@@ -1,0 +1,154 @@
+/* General Body Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f2f7fb;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Dashboard Wrapper for Sidebar and Main Content */
+.dashboard-wrapper {
+    display: flex;
+    flex: 1;
+    min-height: 0; /* Allow main-content to scroll within */
+    height: calc(100vh - 70px); /* Adjust if header height changes */
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 182px;
+  background-color: #ffffff;
+  padding: 20px;
+  border-right: 1px solid #e0e0e0;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.sidebar nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar nav ul li {
+  margin-bottom: 8px;
+}
+
+.sidebar nav ul li a {
+  text-decoration: none;
+  color: #333;
+  display: block;
+  padding: 8px 15px;
+  border-radius: 5px;
+  font-size: 0.95rem;
+}
+
+.sidebar nav ul li a:hover,
+.sidebar nav ul li a.active {
+  background-color: #e6f0fa;
+  color: #004d99;
+  font-weight: bold;
+}
+
+/* Main Content Area */
+.main-content {
+    flex-grow: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+/* Section for Stat Cards */
+.stats-container {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.stat-card {
+    background-color: white;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    text-align: center;
+    flex: 1 1 0px;
+    min-width: 150px;
+}
+
+.stat-card h3 {
+    margin-bottom: 0.5rem;
+    color: #004d99;
+    font-size: 1.1rem;
+}
+
+.stat-card p {
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+/* Chart Section */
+.chart-container {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer Styles */
+footer {
+    text-align: center;
+    padding: 0.75rem 1rem;
+    background-color: #004d99;
+    color: white;
+}
+
+footer p {
+    font-size: 0.85rem;
+    margin: 0;
+    padding: 0;
+}
+
+/*Welcome user and log out */
+
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #004d99;
+  color: white;
+  padding: 8px 20px;
+}
+
+.header-left h1 {
+  margin: 0;
+  font-size: 18px;         /* slightly smaller title */
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px; /* smaller text for username & logout */
+}
+
+.header-right p {
+  margin: 0;
+}
+
+.logout-button {
+  background-color: #e74c3c;
+  color: white;
+  text-decoration: none;
+  padding: 4px 8px; /* smaller button */
+  font-size: 12px;   /* match text size */
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+  background-color: #c0392b;
+}

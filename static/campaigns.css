@@ -1,0 +1,206 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f2f7fb;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+
+.dashboard-wrapper {
+  display: flex;
+  flex-grow: 1;
+}
+
+.sidebar {
+  width: 182px;
+  background-color: #ffffff;
+  padding: 20px;
+  border-right: 1px solid #e0e0e0;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.sidebar nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar nav ul li {
+  margin-bottom: 8px;
+}
+
+.sidebar nav ul li a {
+  text-decoration: none;
+  color: #333;
+  display: block;
+  padding: 8px 15px;
+  border-radius: 5px;
+  font-size: 0.95rem;
+}
+
+.sidebar nav ul li a:hover,
+.sidebar nav ul li a.active {
+  background-color: #e6f0fa;
+  color: #004d99;
+  font-weight: bold;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.campaign-container {
+  background-color: white;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.campaign-container h1 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #004d99;
+}
+
+/* Campaign card styles */
+.campaign-card {
+  background-color: #ffffff;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+}
+
+.campaign-header {
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
+}
+
+.campaign-header h3 {
+  margin: 0;
+}
+
+.campaign-details {
+  display: none;
+  padding-top: 1rem;
+}
+
+.campaign-details ul {
+  padding-left: 1.25rem;
+}
+
+.campaign-details button {
+  margin-top: 0.5rem;
+  margin-right: 0.5rem;
+  padding: 0.4rem 1rem;
+  background-color: #004d99;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.status.ongoing {
+  background-color: #ff9800;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.status.completed {
+  background-color: #4caf50;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+footer {
+  text-align: center;
+  padding: 0rem 1rem;
+  font-size: 0.85rem;
+  background-color: #004d99;
+  color: white;
+  margin-top: auto;
+}
+
+
+/* Search panel styles */
+.search-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+}
+
+.search-panel input,
+.search-panel select,
+.search-panel button {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.search-panel button {
+  background-color: #004d99;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-panel button:hover {
+  background-color: #003366;
+}
+
+
+/*Welcome user and log out */
+
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #004d99;
+  color: white;
+  padding: 8px 20px;
+}
+
+.header-left h1 {
+  margin: 0;
+  font-size: 18px;         /* slightly smaller title */
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px; /* smaller text for username & logout */
+}
+
+.header-right p {
+  margin: 0;
+}
+
+.logout-button {
+  background-color: #e74c3c;
+  color: white;
+  text-decoration: none;
+  padding: 4px 8px; /* smaller button */
+  font-size: 12px;   /* match text size */
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+  background-color: #c0392b;
+}

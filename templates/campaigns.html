@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Campaigns - TambuaPhish</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='campaigns.css') }}"/>
+</head>
+<body>
+  <header class="main-header">
+    <div class="header-left">
+      <h1>TambuaPhish - Campaigns</h1>
+    </div>
+    <div class="header-right">
+      <p>Welcome, {{ username }}!</p>
+      <a href="{{ url_for('logout') }}" class="logout-button">Log out</a>
+    </div>
+  </header>
+
+  <div class="dashboard-wrapper">
+    <aside class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="{{url_for('dashboard')}}">Dashboard</a></li>
+          <li><a href="{{url_for('campaigns')}}" class="active">Campaigns</a></li>
+          <li><a href="{{url_for('phishing_templates')}}">Phishing Templates</a></li>
+          <li><a href="{{url_for('start_a_campaign')}}">Start a Campaign</a></li>
+          <li><a href="{{url_for('training_modules')}}">Training Modules</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <div class="main-content">
+      <div class="campaign-container">
+        <h1>Phishing Campaigns</h1>
+
+        <!-- Search and Filter Panel -->
+        <div class="search-panel">
+          <input type="text" id="keywordInput" placeholder="Search keyword (e.g., Finance, hr@example.com)" oninput="filterCampaigns()" />
+          <input type="date" id="startDateInput" />
+          <input type="date" id="endDateInput" />
+          <select id="statusInput">
+            <option value="">All Statuses</option>
+            <option value="Ongoing">Ongoing</option>
+            <option value="Completed">Completed</option>
+          </select>
+          <input type="number" id="minTargetsInput" placeholder="Min # of targets" min="0" />
+          <button onclick="filterCampaigns()">Filter</button>
+          <button onclick="resetFilters()">Reset</button>
+        </div>
+
+        <div id="campaignList"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Developed by Grant Ombongi Nyamweya &copy; 2025</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='campaigns.js') }}"></script>
+</body>
+</html>

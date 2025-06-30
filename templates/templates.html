@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phishing Templates - TambuaPhish</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='templates.css') }}" />
+  <style>
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #004d99;
+      color: white;
+      padding: 8px 20px;
+    }
+
+    .header-left h1 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .header-right p {
+      margin: 0;
+    }
+
+    .logout-button {
+      background-color: #e74c3c;
+      color: white;
+      text-decoration: none;
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .logout-button:hover {
+      background-color: #c0392b;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="main-header">
+    <div class="header-left">
+      <h1>TambuaPhish - Phishing Templates</h1>
+    </div>
+    <div class="header-right">
+      <p>Welcome, {{ username }}!</p>
+      <a href="{{ url_for('logout') }}" class="logout-button">Log out</a>
+    </div>
+  </header>
+
+  <div class="dashboard-wrapper">
+    <aside class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="{{url_for('dashboard')}}">Dashboard</a></li>
+          <li><a href="{{url_for('campaigns')}}">Campaigns</a></li>
+          <li><a href="{{url_for('phishing_templates')}}" class="active">Phishing Templates</a></li>
+          <li><a href="{{url_for('start_a_campaign')}}">Start a Campaign</a></li>
+          <li><a href="{{url_for('training_modules')}}">Training Modules</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <div class="main-content">
+      <div class="template-header">
+        <h2>Templates by Category</h2>
+        <button id="add-template-btn">+ Add Custom Template</button>
+      </div>
+
+      <div class="template-categories">
+        <div class="category">
+          <h3>Financial</h3>
+          <div class="template-list">
+            <div class="template-card">
+              <h4>Invoice Overdue</h4>
+              <p>"You have an overdue invoice. Please pay now."</p>
+              <div class="template-tags">
+                <span>Finance</span><span>English</span>
+              </div>
+              <div class="template-actions">
+                <button class="preview-btn">Preview</button>
+                <button class="edit-btn">Edit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="category">
+          <h3>HR & Internal</h3>
+          <div class="template-list">
+            <div class="template-card">
+              <h4>Annual Review Required</h4>
+              <p>"Please complete your annual review by Friday."</p>
+              <div class="template-tags">
+                <span>General Staff</span><span>English</span>
+              </div>
+              <div class="template-actions">
+                <button class="preview-btn">Preview</button>
+                <button class="edit-btn">Edit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="category">
+          <h3>Custom Templates</h3>
+          <div class="template-list">
+            <div class="template-card custom">
+              <h4>New Template Title</h4>
+              <p>"Custom phishing email body preview here..."</p>
+              <div class="template-tags">
+                <span>Custom Role</span><span>Language</span>
+              </div>
+              <div class="template-actions">
+                <button class="preview-btn">Preview</button>
+                <button class="edit-btn">Edit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Developed by Grant Ombongi Nyamweya &copy; 2025</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='templates.js') }}"></script>
+</body>
+
+</html>

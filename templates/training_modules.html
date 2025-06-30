@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Training Modules - TambuaPhish</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='start_campaign.css') }}"/>
+</head>
+<body>
+  <header class="main-header">
+    <div class="header-left">
+      <h1>TambuaPhish - Training Modules</h1>
+    </div>
+    <div class="header-right">
+      <p>Welcome, {{ username }}</p>
+      <a href="/logout" class="logout-button">Logout</a>
+    </div>
+  </header>
+
+  <div class="dashboard-wrapper">
+    <aside class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="{{url_for('dashboard')}}">Dashboard</a></li>
+          <li><a href="{{url_for('campaigns')}}">Campaigns</a></li>
+          <li><a href="{{url_for('phishing_templates')}}">Phishing Templates</a></li>
+          <li><a href="{{url_for('start_a_campaign')}}">Start a Campaign</a></li>
+          <li><a href="{{url_for('training_modules')}}" class="active">Training Modules</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <div class="main-content">
+      <h2>Coming Soon: Training Modules Page</h2>
+    </div>
+  </div>
+
+  <footer>
+    <p>Developed by Grant Ombongi Nyamweya &copy; 2025</p>
+  </footer>
+</body>
+</html>
