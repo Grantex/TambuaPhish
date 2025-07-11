@@ -18,14 +18,20 @@
 
                 <input type="email" name="email" required placeholder="Email">
 
-                <input type="password" name="password" required placeholder="Password">
+                <div class="password-wrapper">
+                    <input type="password" name="password" required placeholder="Password">
+                    <span class="toggle-password" onclick="togglePassword(this)">&#128065;</span>
+                </div>
 
                 <!-- Password Guideline Text -->
                 <small class="guideline">
                 Password must be at least 12 characters and include uppercase, lowercase, a number, and a special character.
                 </small>
 
-                <input type="password" name="confirm_password" required placeholder="Confirm Password">
+                <div class="password-wrapper">
+                    <input type="password" name="confirm_password" required placeholder="Confirm Password">
+                    <span class="toggle-password" onclick="togglePassword(this)">&#128065;</span>
+                </div>
 
                 <button type="submit">Sign Up</button>
                 <p>Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
@@ -33,5 +39,20 @@
             </form>
         </div>
     </div>
+
+     <script>
+    function togglePassword(element) {
+        const input = element.previousElementSibling;
+        if (input.type === "password") {
+            input.type = "text";
+            element.style.color = "#000"; // Optional: change color to indicate active
+        } else {
+        input.type = "password";
+        element.style.color = "#fff"; // Back to normal
+        }
+    }
+    </script>
+
+
 </body>
 </html>

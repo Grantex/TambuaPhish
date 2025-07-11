@@ -171,3 +171,47 @@ p a {
 .login-container {
     height: 300px; /* was 300px; increased to give breathing room */
 }
+
+/* forgot password and reset passowrd flask rendering styling*/
+/* Buttons: default white style */
+button,
+input[type="submit"] {
+    background: #fff;
+    color: black;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+}
+
+/* Buttons: on hover, transparent background, white text, white border */
+button:hover,
+input[type="submit"]:hover {
+    background: transparent;
+    color: white;
+    outline: 1px solid #fff;
+}
+
+/* passowrd visibility toogling*/
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 35px; /* add space for the icon inside input */
+}
+
+.password-wrapper .toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 65%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #fff;
+    font-size: 16px;
+    user-select: none;
+}
