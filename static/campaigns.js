@@ -1,6 +1,7 @@
 const campaignData = [
   {
     name: "Cyber Awareness Week",
+    description: "A campaign to raise awareness about phishing tactics in the workplace.",
     start: "2025-06-01",
     end: "2025-06-05",
     status: "Ongoing",
@@ -12,6 +13,7 @@ const campaignData = [
   },
   {
     name: "Finance Test Run",
+    description: "Simulated phishing attempt targeting finance department emails.",
     start: "2025-05-15",
     end: "2025-05-20",
     status: "Completed",
@@ -27,8 +29,9 @@ function renderCampaigns(data) {
   const campaignList = document.getElementById("campaignList");
   campaignList.innerHTML = "";
 
+
   if (data.length === 0) {
-    campaignList.innerHTML = "<p>No campaigns match the filters.</p>";
+    campaignList.innerHTML += "<p>No campaigns match the filters.</p>";
     return;
   }
 
@@ -36,27 +39,35 @@ function renderCampaigns(data) {
     const card = document.createElement("div");
     card.className = "campaign-card";
     card.innerHTML = `
-      <div class="campaign-header" onclick="toggleDetails('details-${index}')">
-        <h3>${campaign.name}</h3>
-        <span class="status ${campaign.status.toLowerCase()}">${campaign.status}</span>
-      </div>
-      <div class="campaign-details" id="details-${index}">
-        <p><strong>Start:</strong> ${campaign.start}</p>
-        <p><strong>End:</strong> ${campaign.end}</p>
-        <p><strong>Click-through rate:</strong> ${campaign.clickThroughRate}</p>
-        <p><strong>Targets:</strong></p>
-        <ol>
-          ${campaign.targets.map(t => `
-            <li>${t.email} - ${t.clicked ? `Clicked at ${t.clickTime} on ${t.clickDate}` : "Not Clicked"}</li>
-          `).join('')}
-        </ol>
-        <button onclick="alert('Generate report for ${campaign.name}')">View Report</button>
-        <button onclick="alert('Deleting ${campaign.name}')">Delete</button>
-      </div>
-    `;
+  <div class="campaign-header" onclick="toggleDetails('details-${index}')">
+    <h3>${campaign.name}</h3>
+    <p class="campaign-description">${campaign.description}</p>
+    <span class="status ${campaign.status.toLowerCase()}">${campaign.status}</span>
+  </div>
+  <div class="campaign-details" id="details-${index}">
+    <p><strong>Start:</strong> ${campaign.start}</p>
+    <p><strong>End:</strong> ${campaign.end}</p>
+    <p><strong>Click-through rate:</strong> ${campaign.clickThroughRate}</p>
+    <p><strong>Targets:</strong></p>
+    <ol>
+      ${campaign.targets.map(t => `
+        <li>${t.email} - ${t.clicked ? `Clicked at ${t.clickTime} on ${t.clickDate}` : "Not Clicked"}</li>
+      `).join('')}
+    </ol>
+    <button onclick="alert('Generate report for ${campaign.name}')">View Report</button>
+    <button onclick="alert('Deleting ${campaign.name}')">Delete</button>
+    ${campaign.status === "Ongoing" ? `<button onclick="closeCampaign(${index})">Close Campaign</button>` : ""}
+  </div>
+`;
     campaignList.appendChild(card);
   });
 }
+
+function closeCampaign(index) {
+  campaignData[index].status = "Completed";
+  renderCampaigns(campaignData);
+}
+
 
 function toggleDetails(id) {
   const el = document.getElementById(id);

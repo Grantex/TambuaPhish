@@ -204,3 +204,31 @@ footer {
 .logout-button:hover {
   background-color: #c0392b;
 }
+
+
+/*--------Numbering Campaigns----------*/
+
+
+/* Initialize counter on the campaign list container */
+#campaignList {
+  counter-reset: campaign-counter;
+}
+
+/* Apply numbering inline before each campaign title */
+.campaign-header h3::before {
+  counter-increment: campaign-counter;
+  content: counter(campaign-counter) ". ";
+  margin-right: 0.5rem;
+  color: #004d99;
+  font-weight: bold;
+}
+
+
+/*-------Styling the Campaign Description---------*/
+
+
+.campaign-description {
+  font-size: 0.95em;
+  color: #666;
+  margin: 4px 0;
+}

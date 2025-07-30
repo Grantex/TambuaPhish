@@ -31,7 +31,27 @@
     </aside>
 
     <div class="main-content">
-      <h2>Coming Soon: Start a Campaign Page</h2>
+      <h2>Launch a New Campaign</h2>
+
+      <form method="POST" class="campaign-form">
+        <label for="name">Campaign Name:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="description">Campaign Description:</label><br>
+        <textarea id="description" name="description" rows="3"></textarea><br><br>
+
+        <label for="email">Target Email Address:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <div class="template-actions">
+          <a href="{{ url_for('phishing_templates') }}" class="template-button">Browse Templates</a>
+          <a href="{{ url_for('create_custom_template') }}" class="template-button secondary">Create Custom Template</a>
+        </div><br>
+
+    
+
+        <input type="submit" value="Launch Campaign">
+      </form>
     </div>
   </div>
 

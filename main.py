@@ -1,4 +1,3 @@
-from itsdangerous import URLSafeTimedSerializer
 from flask import Flask, render_template, redirect, url_for, request, session, flash
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
@@ -8,7 +7,10 @@ from flask_wtf.csrf import CSRFProtect
 from datetime import timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer
 
+#from main import app, db
+#from main import PhishingEmailTemplates
 
 app = Flask(__name__)
 
@@ -97,6 +99,18 @@ class ResetPasswordForm(FlaskForm):
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password', message='Passwords must match.')])
     submit = SubmitField('Reset Password')
 
+# ---- Template Creation Model ----
+class PhishingEmailTemplates(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    template_name = db.Column(db.String(100), nullable=False)
+    sender_name = db.Column(db.String(100), nullable=False)
+    subject_line = db.Column(db.String(200), nullable=False)
+    email_body = db.Column(db.Text, nullable=False)  # Supports large text
+    cta_link = db.Column(db.String(300), nullable=False)
+
+    def __repr__(self):
+        return f'<PhishingEmailTemplates {self.template_name}>'
+    
 
 # ---- Email Sending Function ----
 def send_verification_email(to_email, subject, body_html):
@@ -220,17 +234,103 @@ def campaigns():
         return redirect(url_for('login'))
     return render_template('campaigns.html', username=session['username'])
 
+#Sub-route in Campaigns section
+
+@app.route('/close-campaign/<campaign_id>', methods=['POST'])
+def close_campaign(campaign_id):
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    # Replace with your own data persistence method
+    for campaign in campaigns_data:
+        if campaign['id'] == campaign_id:
+            campaign['status'] = 'Completed'
+            break
+
+    return '', 204  # No Content
+#----------------------------------------------------------------------
+
 @app.route('/phishing templates')
 def phishing_templates():
     if 'username' not in session:
         return redirect(url_for('login'))
     return render_template('templates.html', username=session['username'])
 
+
+@app.route('/save-template', methods=['POST'])
+def save_template():
+    template_id = request.form.get('template_id')  # hidden field in form if editing
+    template_name = request.form.get('template_name')
+    sender_name = request.form.get('sender_name')
+    subject_line = request.form.get('subject_line')
+    email_body = request.form.get('email_body')
+    cta_link = request.form.get('cta_link')
+
+    if template_id:
+        # Update existing template
+        template = PhishingEmailTemplates.query.get(template_id)
+        if template:
+            template.template_name = template_name
+            template.sender_name = sender_name
+            template.subject_line = subject_line
+            template.email_body = email_body
+            template.cta_link = cta_link
+            db.session.commit()
+            flash('Template updated successfully!', 'success')
+        else:
+            flash('Template not found!', 'danger')
+    else:
+        # Create new template
+        new_template = PhishingEmailTemplates(
+            template_name=template_name,
+            sender_name=sender_name,
+            subject_line=subject_line,
+            email_body=email_body,
+            cta_link=cta_link
+        )
+        db.session.add(new_template)
+        db.session.commit()
+        flash('Template created successfully!', 'success')
+
+    return redirect(url_for('phishing templates'))  # Replace with your actual template list route
+
+#--------------------------------------------------------------------------
+
 @app.route('/start a campaign')
 def start_a_campaign():
     if 'username' not in session:
         return redirect(url_for('login'))
     return render_template('start_campaign.html', username=session['username'])
+
+#Routes in start a campaign page and functions
+
+@app.route('/create_custom_template', methods=['GET', 'POST'])
+def create_custom_template():
+    if request.method == 'POST':
+        # Get form data
+        template_name = request.form['template_name']
+        sender_name = request.form['sender_name']
+        sender_email = request.form['sender_email']
+        subject = request.form['subject']
+        body = request.form['email_body']
+        cta_link = request.form.get('cta_link')
+        action = request.form.get('action')  # Get which button was clicked
+
+        # Save the template (simulated here, adapt to your DB/file logic)
+        # Example: new_template_id = save_template_to_db(...)
+
+        flash('Template saved successfully!', 'success')
+
+        if action == 'save':
+            return redirect(url_for('dashboard'))  # or template list page
+        elif action == 'launch':
+            # Redirect to a launch campaign route, possibly with the template info
+            # You can pass the template name or ID if needed
+            return redirect(url_for('launch_campaign'))  # update as needed
+
+    return render_template('inlined_create_custom_template.html')
+
+#-----------------------------------------------------
 
 @app.route('/training modules')
 def training_modules():
