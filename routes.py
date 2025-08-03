@@ -9,7 +9,6 @@ from models import db, User, CustomEmailTemplate
 from forms import (
     RegistrationForm, LoginForm, ForgotPasswordForm, ResetPasswordForm
 )
-from forms import CustomTemplateForm  # adjust the import path as necessary
 
 from flask import Blueprint
 
