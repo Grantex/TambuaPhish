@@ -1,3 +1,5 @@
+<!-- Removed non-essential tags like 'English', 'General Staff', 'Custom Role', 'Language' -->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -55,7 +57,7 @@
     </div>
     <div class="header-right">
       <p>Welcome, {{ username }}!</p>
-      <a href="{{ url_for('logout') }}" class="logout-button">Log out</a>
+      <a href="{{ url_for('routes.logout') }}" class="logout-button">Log out</a>
     </div>
   </header>
 
@@ -63,11 +65,11 @@
     <aside class="sidebar">
       <nav>
         <ul>
-          <li><a href="{{url_for('dashboard')}}">Dashboard</a></li>
-          <li><a href="{{url_for('campaigns')}}">Campaigns</a></li>
-          <li><a href="{{url_for('phishing_templates')}}" class="active">Phishing Templates</a></li>
-          <li><a href="{{url_for('start_a_campaign')}}">Start a Campaign</a></li>
-          <li><a href="{{url_for('training_modules')}}">Training Modules</a></li>
+          <li><a href="{{url_for('routes.dashboard')}}">Dashboard</a></li>
+          <li><a href="{{url_for('routes.campaigns')}}">Campaigns</a></li>
+          <li><a href="{{url_for('routes.phishing_templates')}}" class="active">Phishing Templates</a></li>
+          <li><a href="{{url_for('routes.start_a_campaign')}}">Start a Campaign</a></li>
+          <li><a href="{{url_for('routes.training_modules')}}">Training Modules</a></li>
         </ul>
       </nav>
     </aside>
@@ -85,9 +87,6 @@
             <div class="template-card">
               <h4>Invoice Overdue</h4>
               <p>"You have an overdue invoice. Please pay now."</p>
-              <div class="template-tags">
-                <span>Finance</span><span>English</span>
-              </div>
               <div class="template-actions">
                 <button class="preview-btn">Preview</button>
                 <button class="edit-btn">Edit</button>
@@ -102,9 +101,6 @@
             <div class="template-card">
               <h4>Annual Review Required</h4>
               <p>"Please complete your annual review by Friday."</p>
-              <div class="template-tags">
-                <span>General Staff</span><span>English</span>
-              </div>
               <div class="template-actions">
                 <button class="preview-btn">Preview</button>
                 <button class="edit-btn">Edit</button>
@@ -119,12 +115,10 @@
             <div class="template-card custom">
               <h4>New Template Title</h4>
               <p>"Custom phishing email body preview here..."</p>
-              <div class="template-tags">
-                <span>Custom Role</span><span>Language</span>
-              </div>
               <div class="template-actions">
                 <button class="preview-btn">Preview</button>
                 <button class="edit-btn">Edit</button>
+                <button class="delete-btn">Delete</button>
               </div>
             </div>
           </div>

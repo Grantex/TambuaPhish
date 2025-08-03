@@ -5,3 +5,4 @@ instance/
 *.db
 venv/
 *.sqlite3
+tambuaphish/

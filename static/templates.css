@@ -136,24 +136,46 @@ body {
   gap: 0.5rem;
 }
 
+.template-actions .preview-btn {
+  background-color: #d6ecff; /* Light blue default */
+  color: #004d99;
+}
+
+.template-actions .preview-btn:hover {
+  background-color: #b3dbff; /* Brighter blue on hover */
+  color: #003366;
+}
+
+.template-actions .edit-btn {
+  background-color: #ffe5d1; /* Light orange default */
+  color: #cc5200;
+}
+
+.template-actions .edit-btn:hover {
+  background-color: #ffd2b3; /* Brighter orange on hover */
+  color: #993d00;
+}
+
+.template-actions .delete-btn {
+  background-color: #d1d1d1; /* soft grey default */
+  color: #333333;
+}
+
+.template-actions .delete-btn:hover {
+  background-color: #b3b3b3; /* darker grey on hover */
+  color: #000000;
+}
+
+
 .template-actions button {
   flex: 1;
   padding: 0.4rem;
-  border: none;
+  border: none;            /* 💥 Removes border */
   border-radius: 6px;
   cursor: pointer;
   background-color: #f0f0f0;
   transition: background-color 0.3s;
-}
-
-.template-actions .preview-btn:hover {
-  background-color: #d0e6ff;
-  color: #004d99;
-}
-
-.template-actions .edit-btn:hover {
-  background-color: #ffe0cc;
-  color: #cc5200;
+  outline: none;           /* Optional: removes focus outline */
 }
 
 footer {

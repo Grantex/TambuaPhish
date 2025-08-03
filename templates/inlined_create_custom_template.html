@@ -6,10 +6,51 @@
     <!-- Quill CSS -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 </head>
+
+<style>
+  .save-btn {
+    display: block;
+    width: 100%;
+    background-color: #1976d2;
+    color: white;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .save-btn:hover {
+    background-color: #0a305c; /* deeper blue */
+    box-shadow: 0 0 10px rgba(21, 101, 192, 0.4); /* soft glow */
+  }
+
+  .launch-btn {
+    display: block;
+    width: 100%;
+    background-color: #5a19d2;
+    color: white;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .launch-btn:hover {
+    background-color: #280b5f; /* deeper purple */
+    box-shadow: 0 0 10px rgba(22, 4, 54, 0.4); /* subtle glow */
+  }
+</style>
+
+
 <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; margin: 0; padding: 0;">
     <div class="container" style="max-width: 700px; margin: 50px auto; background-color: #fff; padding: 30px 40px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);">
         <h1 style="text-align: center; margin-bottom: 25px; color: #333;">Create Custom Email Template</h1>
-        <form method="POST" action="{{ url_for('create_custom_template') }}" onsubmit="prepareEmailBody()">
+        <form method="POST" action="{{ url_for('routes.create_custom_template') }}" onsubmit="return prepareEmailBody()">
             <input type="hidden" name="template_id" value="{{ template.id if template else '' }}">
             
             <div class="form-group" style="margin-bottom: 20px;">
@@ -40,8 +81,9 @@
                 <input type="url" id="cta_link" name="cta_link" placeholder="https://example.com" style="width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px;">
             </div>
 
-            <button type="submit" style="display: block; width: 100%; background-color: #1976d2; color: white; padding: 12px; font-size: 16px; border: none; border-radius: 6px; cursor: pointer;">Save Template</button>
-            <button type="submit" style="display: block; width: 100%; background-color: #5a19d2; color: white; padding: 12px; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; margin-top: 16px;">Save & Launch Campaign</button>
+            <button type="submit" class="save-btn" name="action" value="save">Save Template</button>
+            <button type="submit" class="launch-btn" name="action" value="launch">Save & Launch Campaign</button>
+
         </form>
     </div>
 
@@ -55,6 +97,7 @@
         function prepareEmailBody() {
             const emailBodyHtml = document.querySelector('#email_body');
             emailBodyHtml.value = quill.root.innerHTML;
+            return true;
         }
     </script>
 </body>
