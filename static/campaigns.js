@@ -1,34 +1,21 @@
-const campaignData = [
-  {
-    name: "Cyber Awareness Week",
-    description: "A campaign to raise awareness about phishing tactics in the workplace.",
-    start: "2025-06-01",
-    end: "2025-06-05",
-    status: "Ongoing",
-    clickThroughRate: "28%",
-    targets: [
-      { email: "hr@example.com", clicked: true, clickDate: "2025-06-02", clickTime: "09:35 AM" },
-      { email: "admin@example.com", clicked: false }
-    ]
-  },
-  {
-    name: "Finance Test Run",
-    description: "Simulated phishing attempt targeting finance department emails.",
-    start: "2025-05-15",
-    end: "2025-05-20",
-    status: "Completed",
-    clickThroughRate: "18%",
-    targets: [
-      { email: "finance@example.com", clicked: false },
-      { email: "accounting@example.com", clicked: true, clickDate: "2025-05-17", clickTime: "11:15 AM" }
-    ]
+let campaignData = [];
+
+// Fetch campaigns from backend API
+async function loadCampaigns() {
+  try {
+    const res = await fetch("/api/campaigns");
+    if (!res.ok) throw new Error(`Failed to load campaigns: ${res.statusText}`);
+    campaignData = await res.json();
+    renderCampaigns(campaignData);
+  } catch (err) {
+    console.error(err);
+    document.getElementById("campaignList").innerHTML = "<p>Error loading campaigns.</p>";
   }
-];
+}
 
 function renderCampaigns(data) {
   const campaignList = document.getElementById("campaignList");
   campaignList.innerHTML = "";
-
 
   if (data.length === 0) {
     campaignList.innerHTML += "<p>No campaigns match the filters.</p>";
@@ -39,35 +26,47 @@ function renderCampaigns(data) {
     const card = document.createElement("div");
     card.className = "campaign-card";
     card.innerHTML = `
-  <div class="campaign-header" onclick="toggleDetails('details-${index}')">
-    <h3>${campaign.name}</h3>
-    <p class="campaign-description">${campaign.description}</p>
-    <span class="status ${campaign.status.toLowerCase()}">${campaign.status}</span>
-  </div>
-  <div class="campaign-details" id="details-${index}">
-    <p><strong>Start:</strong> ${campaign.start}</p>
-    <p><strong>End:</strong> ${campaign.end}</p>
-    <p><strong>Click-through rate:</strong> ${campaign.clickThroughRate}</p>
-    <p><strong>Targets:</strong></p>
-    <ol>
-      ${campaign.targets.map(t => `
-        <li>${t.email} - ${t.clicked ? `Clicked at ${t.clickTime} on ${t.clickDate}` : "Not Clicked"}</li>
-      `).join('')}
-    </ol>
-    <button onclick="alert('Generate report for ${campaign.name}')">View Report</button>
-    <button onclick="alert('Deleting ${campaign.name}')">Delete</button>
-    ${campaign.status === "Ongoing" ? `<button onclick="closeCampaign(${index})">Close Campaign</button>` : ""}
-  </div>
-`;
+      <div class="campaign-header" onclick="toggleDetails('details-${index}')">
+        <h3>${campaign.name}</h3>
+        <p class="campaign-description">${campaign.description}</p>
+        <span class="status ${campaign.status.toLowerCase()}">${campaign.status}</span>
+      </div>
+      <div class="campaign-details" id="details-${index}" style="display:none;">
+        <p><strong>Start:</strong> ${campaign.start_date ? new Date(campaign.start_date).toLocaleDateString() : "N/A"}</p>
+        <p><strong>End:</strong> ${campaign.end_date ? new Date(campaign.end_date).toLocaleDateString() : "N/A"}</p>
+        <p><strong>Click-through rate:</strong> ${campaign.click_through_rate || "0%"}</p>
+        <p><strong>Targets:</strong></p>
+        <ol>
+          ${campaign.targets && campaign.targets.length > 0
+            ? campaign.targets.map(t => `
+              <li>${t.email} - ${t.clicked
+                ? `Clicked at ${t.click_time || ""} on ${t.click_date || ""}`
+                : "Not Clicked"}</li>
+            `).join('')
+            : "<li>No targets</li>"
+          }
+        </ol>
+        <button onclick="alert('Generate report for ${campaign.name}')">View Report</button>
+        <button onclick="deleteCampaign(${campaign.id})">Delete</button>
+        ${campaign.status === "Ongoing" ? `<button onclick="closeCampaign(${campaign.id})">Close Campaign</button>` : ""}
+      </div>
+    `;
     campaignList.appendChild(card);
   });
 }
 
-function closeCampaign(index) {
-  campaignData[index].status = "Completed";
-  renderCampaigns(campaignData);
+async function closeCampaign(id) {
+  try {
+    const res = await fetch(`/close-campaign/${id}`, { method: "POST" });
+    if (res.ok) {
+      loadCampaigns();
+    } else {
+      alert("Failed to close campaign");
+    }
+  } catch (err) {
+    console.error(err);
+  }
 }
-
 
 function toggleDetails(id) {
   const el = document.getElementById(id);
@@ -84,12 +83,12 @@ function filterCampaigns() {
   const filtered = campaignData.filter(campaign => {
     const matchesKeyword =
       campaign.name.toLowerCase().includes(keyword) ||
-      campaign.targets.some(t => t.email.toLowerCase().includes(keyword));
+      (campaign.targets && campaign.targets.some(t => t.email.toLowerCase().includes(keyword)));
 
-    const matchesStart = !startDate || campaign.start >= startDate;
-    const matchesEnd = !endDate || campaign.end <= endDate;
+    const matchesStart = !startDate || (campaign.start_date && campaign.start_date >= startDate);
+    const matchesEnd = !endDate || (campaign.end_date && campaign.end_date <= endDate);
     const matchesStatus = !status || campaign.status === status;
-    const matchesTargetCount = campaign.targets.length >= minTargets;
+    const matchesTargetCount = (campaign.targets ? campaign.targets.length : 0) >= minTargets;
 
     return matchesKeyword && matchesStart && matchesEnd && matchesStatus && matchesTargetCount;
   });
@@ -107,4 +106,5 @@ function resetFilters() {
   renderCampaigns(campaignData);
 }
 
-renderCampaigns(campaignData);
+// Load campaigns on page load
+loadCampaigns();

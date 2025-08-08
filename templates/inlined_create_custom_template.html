@@ -1,104 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Create Custom Template</title>
-    <!-- Quill CSS -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Create Email Template</title>
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <style>
+    .form-container {
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+    }
+    #editor {
+      height: 200px;
+      background-color: white;
+    }
+  </style>
 </head>
+<body>
+  <div class="form-container">
+    <h2>Create Email Template</h2>
+    <form id="templateForm" method="POST" action="/create-custom-template">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-<style>
-  .save-btn {
-    display: block;
-    width: 100%;
-    background-color: #1976d2;
-    color: white;
-    padding: 12px;
-    font-size: 16px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  }
+      <!-- Template fields -->
+      <label>Template Name:</label>
+      <input type="text" name="template_name" required><br><br>
 
-  .save-btn:hover {
-    background-color: #0a305c; /* deeper blue */
-    box-shadow: 0 0 10px rgba(21, 101, 192, 0.4); /* soft glow */
-  }
+      <label>Sender Name:</label>
+      <input type="text" name="sender_name" required><br><br>
 
-  .launch-btn {
-    display: block;
-    width: 100%;
-    background-color: #5a19d2;
-    color: white;
-    padding: 12px;
-    font-size: 16px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-top: 16px;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  }
+      <label>Subject:</label>
+      <input type="text" name="subject" required><br><br>
 
-  .launch-btn:hover {
-    background-color: #280b5f; /* deeper purple */
-    box-shadow: 0 0 10px rgba(22, 4, 54, 0.4); /* subtle glow */
-  }
-</style>
+      <label>Email Body:</label>
+      <div id="editor"></div>
+      <input type="hidden" name="email_body" id="email_body"><br>
+
+      <!-- Hidden fields for campaign data (only used in Save & Launch) -->
+       
+      <input type="hidden" name="campaign_name" value="{{ campaign_name }}">
+      <input type="hidden" name="campaign_description" value="{{ campaign_description }}">
+      <input type="hidden" name="target_emails" value="{{ target_emails }}">
 
 
-<body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; margin: 0; padding: 0;">
-    <div class="container" style="max-width: 700px; margin: 50px auto; background-color: #fff; padding: 30px 40px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);">
-        <h1 style="text-align: center; margin-bottom: 25px; color: #333;">Create Custom Email Template</h1>
-        <form method="POST" action="{{ url_for('routes.create_custom_template') }}" onsubmit="return prepareEmailBody()">
-            <input type="hidden" name="template_id" value="{{ template.id if template else '' }}">
-            
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label for="template_name" style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">Template Name:</label>
-                <input type="text" id="template_name" name="template_name" required style="width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px;">
-            </div>
+      <!-- Action buttons -->
+      <button type="submit" name="save_only">Save Template</button>
+      <button type="submit" name="save_and_launch">Save & Launch</button>
+    </form>
+  </div>
 
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label for="sender_name" style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">Sender Name:</label>
-                <input type="text" id="sender_name" name="sender_name" required style="width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px;">
-            </div>
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+  <script>
+    const quill = new Quill('#editor', { theme: 'snow' });
 
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label for="subject" style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">Subject Line:</label>
-                <input type="text" id="subject" name="subject" required style="width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px;">
-            </div>
-
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label for="email_body_editor" style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">Email Body:</label>
-                <!-- Quill Editor Container -->
-                <div id="email_body_editor" style="height: 200px; background-color: white; border: 1px solid #ccc; border-radius: 6px;"></div>
-                <!-- Hidden input to store formatted HTML -->
-                <textarea id="email_body" name="email_body" style="display:none;" required></textarea>
-            </div>
-
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label for="cta_link" style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">CTA Link (Optional):</label>
-                <input type="url" id="cta_link" name="cta_link" placeholder="https://example.com" style="width: 100%; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px;">
-            </div>
-
-            <button type="submit" class="save-btn" name="action" value="save">Save Template</button>
-            <button type="submit" class="launch-btn" name="action" value="launch">Save & Launch Campaign</button>
-
-        </form>
-    </div>
-
-    <!-- Quill JS -->
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-    <script>
-        const quill = new Quill('#email_body_editor', {
-            theme: 'snow'
-        });
-
-        function prepareEmailBody() {
-            const emailBodyHtml = document.querySelector('#email_body');
-            emailBodyHtml.value = quill.root.innerHTML;
-            return true;
-        }
-    </script>
+    document.getElementById('templateForm').onsubmit = function() {
+      document.getElementById('email_body').value = quill.root.innerHTML;
+    };
+  </script>
 </body>
 </html>

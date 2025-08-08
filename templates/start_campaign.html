@@ -21,11 +21,11 @@
     <aside class="sidebar">
       <nav>
         <ul>
-          <li><a href="{{url_for('routes.dashboard')}}">Dashboard</a></li>
-          <li><a href="{{url_for('routes.campaigns')}}">Campaigns</a></li>
-          <li><a href="{{url_for('routes.phishing_templates')}}">Phishing Templates</a></li>
-          <li><a href="{{url_for('routes.start_a_campaign')}}" class="active">Start a Campaign</a></li>
-          <li><a href="{{url_for('routes.training_modules')}}">Training Modules</a></li>
+          <li><a href="{{ url_for('routes.dashboard') }}">Dashboard</a></li>
+          <li><a href="{{ url_for('routes.campaigns') }}">Campaigns</a></li>
+          <li><a href="{{ url_for('routes.phishing_templates') }}">Phishing Templates</a></li>
+          <li><a href="{{ url_for('routes.start_a_campaign') }}" class="active">Start a Campaign</a></li>
+          <li><a href="{{ url_for('routes.training_modules') }}">Training Modules</a></li>
         </ul>
       </nav>
     </aside>
@@ -34,23 +34,35 @@
       <h2>Launch a New Campaign</h2>
 
       <form method="POST" class="campaign-form">
-        <label for="name">Campaign Name:</label><br>
-        <input type="text" id="name" name="name" required><br><br>
+        <input type="hidden" name="csrf_token" value="{{csrf_token}}"
 
-        <label for="description">Campaign Description:</label><br>
-        <textarea id="description" name="description" rows="3"></textarea><br><br>
+        <label for="campaign_name">Campaign Name:</label><br>
+        <input type="text" id="campaign_name" name="campaign_name" required><br><br>
 
-        <label for="email">Target Email Address:</label><br>
-        <input type="email" id="email" name="email" required><br><br>
+        <label for="campaign_description">Campaign Description:</label><br>
+        <textarea id="campaign_description" name="campaign_description" rows="3"></textarea><br><br>
+
+        <label for="target_emails">Target Email Addresses (comma-separated or line-separated):</label><br>
+        <textarea id="target_emails" name="target_emails" rows="4" placeholder="e.g. alice@example.com, bob@example.com" required></textarea><br><br>
+
+        <label for="selected_template_id">Select a Template:</label><br>
+        <select id="selected_template_id" name="selected_template_id" required>
+          <option value="">-- Select a Template --</option>
+          {% for template in templates %}
+            <option value="{{ template.id }}">
+              {{ template.template_name }} -
+              {{ template.subject }} -
+              {{ template.sender_name }}
+            </option>
+          {% endfor %}
+        </select><br><br>
 
         <div class="template-actions">
           <a href="{{ url_for('routes.phishing_templates') }}" class="template-button">Browse Templates</a>
           <a href="{{ url_for('routes.create_custom_template') }}" class="template-button secondary">Create Custom Template</a>
         </div><br>
 
-    
-
-        <input type="submit" value="Launch Campaign">
+        <input type="submit" name="launch_campaign" value="Launch Campaign">
       </form>
     </div>
   </div>

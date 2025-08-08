@@ -49,7 +49,56 @@
           <button onclick="resetFilters()">Reset</button>
         </div>
 
-        <div id="campaignList"></div>
+        
+         <div id="campaignList">
+            {% if campaigns %}
+              <table class="campaign-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Template</th>
+                    <th>Targets</th>
+                    <th>Status</th>
+                    <th>Launched</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for c in campaigns %}
+                  <tr>
+                    <td>{{ c.name }}</td>
+                    <td>{{ c.description }}</td>
+                    <td>
+                      {% if c.CustomEmailTemplate %}
+                        {{ c.CustomEmailTemplate.template_name }}
+                      {% else %}
+                        <em>No template</em>
+                      {% endif %}
+                    </td>
+                    <td>{{ c.recipients|length if c.recipients else 0 }}</td>
+                    <td>{{ c.status }}</td>
+                    <td>{{ c.start_date.strftime('%Y-%m-%d %H:%M') if c.start_date else 'N/A' }}</td>
+                    <td>
+                      {% if c.status != 'Completed' %}
+                        <form method="POST" action="{{ url_for('routes.close_campaign', campaign_id=c.id) }}">
+                          <button type="submit">Close</button>
+                        </form>
+                      {% else %}
+                        <em>Closed</em>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            {% else %}
+              <p>No campaigns found.</p>
+            {% endif %}
+          </div>
+
+    
+
       </div>
     </div>
   </div>

@@ -1,9 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, HiddenField
 from wtforms.validators import (
     DataRequired, Length, Email, EqualTo, ValidationError, Regexp
 )
-
+from wtforms import HiddenField
 from models import User
 
 class RegistrationForm(FlaskForm):
@@ -66,3 +66,16 @@ class ResetPasswordForm(FlaskForm):
         validators=[DataRequired(), EqualTo('password', message='Passwords must match.')]
     )
     submit = SubmitField('Reset Password')
+
+
+    #------Edit Template Function--------
+
+
+class EditTemplateForm(FlaskForm):
+    template_name = StringField('Template Name', validators=[DataRequired()])
+    sender_name = StringField('Sender Name', validators=[DataRequired()])
+    subject = StringField('Subject', validators=[DataRequired()])
+    email_body = HiddenField('Email Body', validators=[DataRequired()])
+    submit = SubmitField('Update Template')
+
+
