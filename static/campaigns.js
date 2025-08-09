@@ -23,6 +23,12 @@ function renderCampaigns(data) {
   }
 
   data.forEach((campaign, index) => {
+    const totalRecipients = campaign.recipients ? campaign.recipients.length : 0;
+    const clicks = campaign.recipients
+      ? campaign.recipients.filter(r => r.has_clicked).length
+      : 0;
+    const clickRate = totalRecipients > 0 ? ((clicks / totalRecipients) * 100).toFixed(1) + "%" : "0%";
+
     const card = document.createElement("div");
     card.className = "campaign-card";
     card.innerHTML = `
@@ -34,21 +40,34 @@ function renderCampaigns(data) {
       <div class="campaign-details" id="details-${index}" style="display:none;">
         <p><strong>Start:</strong> ${campaign.start_date ? new Date(campaign.start_date).toLocaleDateString() : "N/A"}</p>
         <p><strong>End:</strong> ${campaign.end_date ? new Date(campaign.end_date).toLocaleDateString() : "N/A"}</p>
-        <p><strong>Click-through rate:</strong> ${campaign.click_through_rate || "0%"}</p>
-        <p><strong>Targets:</strong></p>
+        <p><strong>Total Recipients:</strong> ${totalRecipients}</p>
+        <p><strong>Clicks:</strong> ${clicks}</p>
+        <p><strong>Click-through Rate:</strong> ${clickRate}</p>
+        <p><strong>Recipients:</strong></p>
         <ol>
-          ${campaign.targets && campaign.targets.length > 0
-            ? campaign.targets.map(t => `
-              <li>${t.email} - ${t.clicked
-                ? `Clicked at ${t.click_time || ""} on ${t.click_date || ""}`
-                : "Not Clicked"}</li>
-            `).join('')
-            : "<li>No targets</li>"
+          ${
+            campaign.recipients && campaign.recipients.length > 0
+              ? campaign.recipients
+                  .map(r => `
+                    <li>
+                      ${r.email} - ${
+                        r.has_clicked
+                          ? `Clicked at ${r.clicked_at ? new Date(r.clicked_at).toLocaleString() : ""}`
+                          : "Not Clicked"
+                      }
+                    </li>
+                  `)
+                  .join("")
+              : "<li>No recipients</li>"
           }
         </ol>
         <button onclick="alert('Generate report for ${campaign.name}')">View Report</button>
         <button onclick="deleteCampaign(${campaign.id})">Delete</button>
-        ${campaign.status === "Ongoing" ? `<button onclick="closeCampaign(${campaign.id})">Close Campaign</button>` : ""}
+        ${
+          campaign.status === "Ongoing"
+            ? `<button onclick="closeCampaign(${campaign.id})">Close Campaign</button>`
+            : ""
+        }
       </div>
     `;
     campaignList.appendChild(card);
@@ -83,12 +102,13 @@ function filterCampaigns() {
   const filtered = campaignData.filter(campaign => {
     const matchesKeyword =
       campaign.name.toLowerCase().includes(keyword) ||
-      (campaign.targets && campaign.targets.some(t => t.email.toLowerCase().includes(keyword)));
+      (campaign.recipients &&
+        campaign.recipients.some(r => r.email.toLowerCase().includes(keyword)));
 
     const matchesStart = !startDate || (campaign.start_date && campaign.start_date >= startDate);
     const matchesEnd = !endDate || (campaign.end_date && campaign.end_date <= endDate);
     const matchesStatus = !status || campaign.status === status;
-    const matchesTargetCount = (campaign.targets ? campaign.targets.length : 0) >= minTargets;
+    const matchesTargetCount = (campaign.recipients ? campaign.recipients.length : 0) >= minTargets;
 
     return matchesKeyword && matchesStart && matchesEnd && matchesStatus && matchesTargetCount;
   });

@@ -21,11 +21,11 @@
     <aside class="sidebar">
       <nav>
         <ul>
-          <li><a href="{{url_for('routes.dashboard')}}">Dashboard</a></li>
-          <li><a href="{{url_for('routes.campaigns')}}" class="active">Campaigns</a></li>
-          <li><a href="{{url_for('routes.phishing_templates')}}">Phishing Templates</a></li>
-          <li><a href="{{url_for('routes.start_a_campaign')}}">Start a Campaign</a></li>
-          <li><a href="{{url_for('routes.training_modules')}}">Training Modules</a></li>
+          <li><a href="{{ url_for('routes.dashboard') }}">Dashboard</a></li>
+          <li><a href="{{ url_for('routes.campaigns') }}" class="active">Campaigns</a></li>
+          <li><a href="{{ url_for('routes.phishing_templates') }}">Phishing Templates</a></li>
+          <li><a href="{{ url_for('routes.start_a_campaign') }}">Start a Campaign</a></li>
+          <li><a href="{{ url_for('routes.training_modules') }}">Training Modules</a></li>
         </ul>
       </nav>
     </aside>
@@ -36,7 +36,7 @@
 
         <!-- Search and Filter Panel -->
         <div class="search-panel">
-          <input type="text" id="keywordInput" placeholder="Search keyword (e.g., Finance, hr@example.com)" oninput="filterCampaigns()" />
+          <input type="text" id="keywordInput" placeholder="Search keyword..." oninput="filterCampaigns()" />
           <input type="date" id="startDateInput" />
           <input type="date" id="endDateInput" />
           <select id="statusInput">
@@ -44,61 +44,88 @@
             <option value="Ongoing">Ongoing</option>
             <option value="Completed">Completed</option>
           </select>
-          <input type="number" id="minTargetsInput" placeholder="Min # of targets" min="0" />
+          <input type="number" id="minTargetsInput" placeholder="Min # of recipients" min="0" />
           <button onclick="filterCampaigns()">Filter</button>
           <button onclick="resetFilters()">Reset</button>
         </div>
 
-        
-         <div id="campaignList">
-            {% if campaigns %}
-              <table class="campaign-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Template</th>
-                    <th>Targets</th>
-                    <th>Status</th>
-                    <th>Launched</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for c in campaigns %}
-                  <tr>
-                    <td>{{ c.name }}</td>
-                    <td>{{ c.description }}</td>
-                    <td>
-                      {% if c.CustomEmailTemplate %}
-                        {{ c.CustomEmailTemplate.template_name }}
-                      {% else %}
-                        <em>No template</em>
-                      {% endif %}
-                    </td>
-                    <td>{{ c.recipients|length if c.recipients else 0 }}</td>
-                    <td>{{ c.status }}</td>
-                    <td>{{ c.start_date.strftime('%Y-%m-%d %H:%M') if c.start_date else 'N/A' }}</td>
-                    <td>
-                      {% if c.status != 'Completed' %}
-                        <form method="POST" action="{{ url_for('routes.close_campaign', campaign_id=c.id) }}">
-                          <button type="submit">Close</button>
-                        </form>
-                      {% else %}
-                        <em>Closed</em>
-                      {% endif %}
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            {% else %}
-              <p>No campaigns found.</p>
-            {% endif %}
-          </div>
+        <div id="campaignList">
+          {% if campaigns %}
+            <table class="campaign-table">
+              <thead>
+                <tr>
+                  <th>Campaign Name</th>
+                  <th>Description</th>
+                  <th>Template</th>
+                  <th>Total Recipients</th>
+                  <th>Clicks</th>
+                  <th>Status</th>
+                  <th>Launched</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for c in campaigns %}
+                <tr>
+                  <td>{{ c.name }}</td>
+                  <td>{{ c.description }}</td>
+                  <td>{{ c.template.template_name if c.template else '—' }}</td>
+                  <td>{{ c.recipients|length if c.recipients else 0 }}</td>
+                  <td>
+                    {% set click_count = c.recipients|selectattr('has_clicked', 'equalto', True)|list|length if c.recipients else 0 %}
+                    {{ click_count }}
+                  </td>
+                  <td>{{ c.status }}</td>
+                  <td>{{ c.start_date.strftime('%Y-%m-%d %H:%M') if c.start_date else 'N/A' }}</td>
+                  <td>
+                    {% if c.status != 'Completed' %}
+                      <form method="POST" action="{{ url_for('routes.close_campaign', campaign_id=c.id) }}">
+                        <button type="submit">Close</button>
+                      </form>
+                    {% else %}
+                      <em>Closed</em>
+                    {% endif %}
+                  </td>
+                </tr>
 
-    
-
+                <!-- Recipients Detail Row -->
+                <tr class="recipient-details">
+                  <td colspan="8">
+                    <table class="recipient-table">
+                      <thead>
+                        <tr>
+                          <th>Email</th>
+                          <th>Clicked?</th>
+                          <th>Clicked At</th>
+                          <th>Sent At</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% if c.recipients %}
+                          {% for r in c.recipients %}
+                          <tr>
+                            <td>{{ r.email }}</td>
+                            <td>{{ 'Yes' if r.has_clicked else 'No' }}</td>
+                            <td>{{ r.clicked_at.strftime('%Y-%m-%d %H:%M:%S') if r.clicked_at else '—' }}</td>
+                            <td>{{ r.sent_at.strftime('%Y-%m-%d %H:%M:%S') if r.sent_at else '—' }}</td>
+                          </tr>
+                          {% endfor %}
+                        {% else %}
+                          <tr>
+                            <td colspan="4"><em>No recipients</em></td>
+                          </tr>
+                        {% endif %}
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p>No campaigns found.</p>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>

@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
-from models import db, User, CustomEmailTemplate, Campaign, Target, Recipient
+from models import db, User, CustomEmailTemplate, Campaign, Recipient
 from forms import (
     RegistrationForm, LoginForm, ForgotPasswordForm, ResetPasswordForm
 )
@@ -13,6 +13,10 @@ from forms import (
 from flask import Blueprint
 from flask_wtf.csrf import generate_csrf
 from flask import jsonify
+from datetime import datetime
+from phishing_email_function import send_phishing_email
+from flask import session
+from models import User
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -165,6 +169,8 @@ def dashboard():
 from datetime import datetime
 from flask import render_template, redirect, url_for, session, request
 from models import Campaign
+from sqlalchemy.orm import joinedload
+
 
 
 @routes_bp.route('/campaigns')
@@ -172,8 +178,10 @@ def campaigns():
     if 'username' not in session:
         return redirect(url_for('routes.login'))
     
-    # Query all campaigns, newest first
-    all_campaigns = Campaign.query.order_by(Campaign.start_date.desc()).all()
+    # Eager load recipients so they are ready for the template
+    all_campaigns = Campaign.query.options(
+        joinedload(Campaign.recipients)
+    ).order_by(Campaign.start_date.desc()).all()
 
     return render_template(
         'campaigns.html',
@@ -183,33 +191,66 @@ def campaigns():
 
 
 
-@routes_bp.route('/api/campaigns')
-def api_campaigns():
-    if 'user_id' not in session:
-        return jsonify({"error": "Not logged in"}), 401
-
-    try:
-        user_id = session['username']
-        campaigns = Campaign.query.filter_by(user_id=user_id).all()
-
-        result = []
-        for c in campaigns:
-            result.append({
-                "id": c.id,
-                "name": c.name,
-                "description": c.description,
-                "start_date": c.start_date.strftime("%Y-%m-%d") if c.start_date else None,
-                "end_date": c.end_date.strftime("%Y-%m-%d") if c.end_date else None,
-                "status": c.status,
-                "targets": [{"email": t.email} for t in c.targets]
-            })
-        return jsonify(result)
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
 
 
+@routes_bp.route("/api/campaigns")
+def get_campaigns():
+    campaigns = Campaign.query.filter_by(user_id=session["username"]).all()
+    result = []
+
+    for campaign in campaigns:
+        recipients = Recipient.query.filter_by(campaign_id=campaign.id).all()
+
+        total_recipients = len(recipients)
+        clicks = sum(1 for r in recipients if r.has_clicked)
+        click_rate = round((clicks / total_recipients) * 100, 2) if total_recipients > 0 else 0
+
+        result.append({
+            "id": campaign.id,
+            "name": campaign.name,
+            "description": campaign.description,
+            "status": campaign.status,
+            "start_date": campaign.start_date.isoformat() if campaign.start_date else None,
+            "end_date": campaign.end_date.isoformat() if campaign.end_date else None,
+            "total_recipients": total_recipients,
+            "clicks": clicks,
+            "click_rate": f"{click_rate}%",
+            "recipients": [
+                {
+                    "email": r.email,
+                    "has_clicked": r.has_clicked,
+                    "clicked_at": r.clicked_at.isoformat() if r.clicked_at else None
+                } for r in recipients
+            ]
+        })
+
+    return jsonify(result)
+
+
+
+from datetime import datetime
+
+@routes_bp.route('/track-link/<int:campaign_id>/<int:recipient_id>')
+def track_link(campaign_id, recipient_id):
+    recipient = Recipient.query.filter_by(
+        id=recipient_id,
+        campaign_id=campaign_id
+    ).first()
+
+    if recipient:
+        # Only mark first click (if you want to avoid overwriting)
+        if not recipient.has_clicked:
+            recipient.has_clicked = True
+            recipient.clicked_at = datetime.utcnow()
+            db.session.commit()
+
+    # Redirect to a landing page (can be awareness page, fake login, etc.)
+    return redirect(url_for('routes.phish_landing'))
+
+
+@routes_bp.route('/phish-landing')
+def phish_landing():
+    return render_template('phish_busted.html')
 
 
 # --- Close Campaign ---
@@ -334,13 +375,12 @@ def start_a_campaign():
         target_emails_raw = request.form.get('target_emails')
         selected_template_id = request.form.get('selected_template_id')
 
-        # 🚀 Save & Launch path (create template before launching)
+        # 🚀 Save & Launch path
         if 'save_and_launch' in request.form:
             if not campaign_name or not campaign_description or not target_emails_raw:
                 flash("Please fill all campaign fields before creating a template to launch.", "danger")
                 return redirect(url_for('routes.start_a_campaign'))
 
-            # Store in session so template page can prefill hidden inputs
             session['pending_campaign'] = {
                 'campaign_name': campaign_name,
                 'campaign_description': campaign_description,
@@ -355,23 +395,35 @@ def start_a_campaign():
 
         target_emails = [email.strip() for email in target_emails_raw.split(',') if email.strip()]
 
+        # ✅ Create campaign
         new_campaign = Campaign(
-            name=campaign_name,
-            description=campaign_description,
+            name=campaign_name.strip(),
+            description=campaign_description.strip(),
             template_id=selected_template_id,
-            user_id=session['username']
+            user_id=session['username']  # ✅ store actual user.id, not username
         )
         db.session.add(new_campaign)
-        db.session.commit()
+        db.session.commit()  # commit so campaign_id exists
 
+        # ✅ Create recipients
+        recipients = []
         for email in target_emails:
-            db.session.add(Target(email=email, campaign_id=new_campaign.id))
-        db.session.commit()
+            recipient = Recipient(email=email, campaign_id=new_campaign.id)
+            db.session.add(recipient)
+            recipients.append(recipient)
+        db.session.commit()  # commit so recipient IDs exist
 
-        flash('Campaign launched successfully!', 'success')
+        # ✅ Load email template
+        template = CustomEmailTemplate.query.get(selected_template_id)
+
+        # ✅ Send emails using real recipient IDs
+        for recipient in recipients:
+            send_phishing_email(recipient.email, template, new_campaign.id, recipient.id)
+
+        flash('Campaign launched and phishing emails sent successfully!', 'success')
         return redirect(url_for('routes.campaigns'))
 
-    # When just visiting the page
+    # Just visiting the page
     pending_campaign = session.pop('pending_campaign', None)
     csrf_token = generate_csrf()
 

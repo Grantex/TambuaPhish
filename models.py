@@ -3,7 +3,7 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
-# Define CustomEmailTemplate first
+# Email template model
 class CustomEmailTemplate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -12,7 +12,8 @@ class CustomEmailTemplate(db.Model):
     subject = db.Column(db.String(200), nullable=False)
     email_body = db.Column(db.Text, nullable=False)
 
-# Then define User with the relationship
+
+# User model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
@@ -26,15 +27,13 @@ class User(db.Model):
         return f'<User {self.username}>'
 
 
-
-
+# Campaign model — now only linked to recipients, no "Target" table
 class Campaign(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
     template_id = db.Column(db.Integer, db.ForeignKey('custom_email_template.id'), nullable=False)
-      # NEW
 
     start_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     end_date = db.Column(db.DateTime, nullable=True)
@@ -42,27 +41,19 @@ class Campaign(db.Model):
 
     # Relationships
     template = db.relationship('CustomEmailTemplate', backref=db.backref('campaigns', lazy=True))
-    targets = db.relationship('Target', backref='campaign', lazy=True)
+    recipients = db.relationship('Recipient', backref='campaign', lazy=True)
     user = db.relationship('User', backref=db.backref('campaigns', lazy=True))
 
     def mark_completed(self):
         self.status = "Completed"
-        self.end_date = datetime.utcnow()
+        self.end_date = datetime.now()
 
 
-
-class Target(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), nullable=False)
-    campaign_id = db.Column(db.Integer, db.ForeignKey('campaign.id'), nullable=False)
-
-
+# Recipient model
 class Recipient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100))
-    campaign_id = db.Column(db.Integer, db.ForeignKey('campaign.id'))
+    email = db.Column(db.String(100), nullable=False)
+    campaign_id = db.Column(db.Integer, db.ForeignKey('campaign.id'), nullable=False)
     has_clicked = db.Column(db.Boolean, default=False)
     clicked_at = db.Column(db.DateTime, nullable=True)
-    sent_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    campaign = db.relationship('Campaign', backref=db.backref('recipients', lazy=True))
+    sent_at = db.Column(db.DateTime, default=datetime.now())
