@@ -2,29 +2,34 @@ const ctx = document.getElementById('campaignChart').getContext('2d');
 const campaignChart = new Chart(ctx, {
     type: 'bar',
     data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May','Jun','July','Aug','Sep','Oct','Nov','Dec'],
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
         datasets: [
             {
                 label: 'Phishing Emails Sent',
-                data: [120, 90, 150, 130, 170],
+                data: chartData.emailsSent,
                 backgroundColor: 'rgba(0, 77, 153, 0.5)',
                 borderColor: '#004d99',
                 borderWidth: 1,
-                yAxisID: 'y',
+                yAxisID: 'y', // Left axis
             },
             {
                 label: 'Click-Through Rate (%)',
-                data: [22, 18, 30, 25, 28],
+                data: chartData.ctr,
                 type: 'line',
                 borderColor: '#e67e22',
                 backgroundColor: '#e67e22',
                 tension: 0.4,
-                yAxisID: 'y1',
+                yAxisID: 'y1', // Right axis
             }
         ]
     },
     options: {
         responsive: true,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        stacked: false,
         scales: {
             y: {
                 type: 'linear',
@@ -41,19 +46,21 @@ const campaignChart = new Chart(ctx, {
                     display: true,
                     text: 'Click-Through Rate (%)'
                 },
+                min: 0,
+                max: 100, // Keep CTR as percentage
+                ticks: {
+                    callback: function(value) {
+                        return value + '%';
+                    }
+                },
                 grid: {
-                    drawOnChartArea: false,
+                    drawOnChartArea: false // Avoid grid overlap
                 }
             }
         },
         plugins: {
-            tooltip: {
-                mode: 'index',
-                intersect: false,
-            },
-            legend: {
-                position: 'top',
-            }
-        },
+            tooltip: { mode: 'index', intersect: false },
+            legend: { position: 'top' }
+        }
     }
 });

@@ -17,6 +17,7 @@ from datetime import datetime
 from phishing_email_function import send_phishing_email
 from flask import session
 from models import User
+#from flask_login import current_user, login_required
 
 routes_bp = Blueprint('routes', __name__)
 
@@ -162,7 +163,53 @@ def reset_password(token):
 def dashboard():
     if 'username' not in session:
         return redirect(url_for('routes.login'))
-    return render_template('dashboard.html', username=session['username'])
+
+    username = session['username']
+
+    # Campaign & recipient counts filtered by username
+    user_campaigns = Campaign.query.filter_by(user_id=username).all()
+    total_campaigns = len(user_campaigns)
+
+    total_recipients = Recipient.query.join(Campaign).filter(Campaign.user_id == username).count()
+    total_clicks = Recipient.query.join(Campaign).filter(
+        Campaign.user_id == username,
+        Recipient.has_clicked == True
+    ).count()
+
+    ctr = (total_clicks / total_recipients * 100) if total_recipients > 0 else 0
+
+    # Build dynamic monthly data
+    monthly_emails_sent = []
+    monthly_ctr = []
+
+    for month in range(1, 13):
+        month_recipients = Recipient.query.join(Campaign).filter(
+            Campaign.user_id == username,
+            db.extract('month', Recipient.sent_at) == month
+        ).count()
+
+        month_clicks = Recipient.query.join(Campaign).filter(
+            Campaign.user_id == username,
+            db.extract('month', Recipient.sent_at) == month,
+            Recipient.has_clicked == True
+        ).count()
+
+        monthly_emails_sent.append(month_recipients)
+        monthly_ctr.append((month_clicks / month_recipients * 100) if month_recipients > 0 else 0)
+
+    return render_template(
+        'dashboard.html',
+        username=username,
+        total_campaigns=total_campaigns,
+        total_recipients=total_recipients,
+        total_clicks=total_clicks,
+        ctr=round(ctr, 1),
+        monthly_emails_sent=monthly_emails_sent,
+        monthly_ctr=monthly_ctr
+    )
+
+
+
 
 
 # --- Campaigns ---
@@ -188,9 +235,6 @@ def campaigns():
         username=session['username'],
         campaigns=all_campaigns
     )
-
-
-
 
 
 @routes_bp.route("/api/campaigns")
@@ -227,6 +271,39 @@ def get_campaigns():
     return jsonify(result)
 
 
+# NEW: Close campaign route
+from datetime import datetime
+from flask import jsonify
+
+from flask import request
+from flask_wtf.csrf import CSRFProtect
+
+csrf = CSRFProtect()
+
+@routes_bp.route("/close-campaign/<int:campaign_id>", methods=["POST"])
+def close_campaign(campaign_id):
+    if "username" not in session:
+        return jsonify({"error": "Not logged in"}), 401
+
+    # Get the logged-in user from the database
+    user = User.query.filter_by(username=session["username"]).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    # Fetch campaign and ensure it belongs to the logged-in user
+    campaign = Campaign.query.get(campaign_id)
+    if not campaign or campaign.user_id != user.id:
+        return jsonify({"error": "Campaign not found or unauthorized"}), 404
+
+    campaign.status = "Closed"
+    campaign.end_date = datetime.utcnow()
+    db.session.commit()
+
+    return jsonify({"message": "Campaign closed successfully"}), 200
+
+
+
+
 
 from datetime import datetime
 
@@ -254,18 +331,18 @@ def phish_landing():
 
 
 # --- Close Campaign ---
-@routes_bp.route('/close-campaign/<int:campaign_id>', methods=['POST'])
-def close_campaign(campaign_id):
-    if 'username' not in session:
-        return redirect(url_for('routes.login'))
+# @routes_bp.route('/close-campaign/<int:campaign_id>', methods=['POST'])
+# def close_campaign(campaign_id):
+#     if 'username' not in session:
+#         return redirect(url_for('routes.login'))
 
-    campaign = Campaign.query.get_or_404(campaign_id)
-    campaign.status = "Completed"
-    campaign.end_date = datetime.utcnow()
+#     campaign = Campaign.query.get_or_404(campaign_id)
+#     campaign.status = "Completed"
+#     campaign.end_date = datetime.utcnow()
 
-    db.session.commit()
+#     db.session.commit()
 
-    return redirect(url_for('routes.campaigns'))
+#     return redirect(url_for('routes.campaigns'))
 
 
 

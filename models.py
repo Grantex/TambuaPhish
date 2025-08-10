@@ -49,7 +49,6 @@ class Campaign(db.Model):
         self.end_date = datetime.now()
 
 
-# Recipient model
 class Recipient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), nullable=False)
@@ -57,3 +56,5 @@ class Recipient(db.Model):
     has_clicked = db.Column(db.Boolean, default=False)
     clicked_at = db.Column(db.DateTime, nullable=True)
     sent_at = db.Column(db.DateTime, default=datetime.now())
+
+

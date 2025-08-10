@@ -92,19 +92,19 @@
         <section class="stats-container">
           <div class="stat-card">
             <h3>Total Campaigns</h3>
-            <p id="total-campaigns">12</p>
+            <p id="total-campaigns">{{ total_campaigns }}</p>
           </div>
           <div class="stat-card">
-            <h3>Total Targets</h3>
-            <p id="total-targets">320</p>
+            <h3>Total Recipients</h3>
+            <p id="total-recipients">{{ total_recipients }}</p>
           </div>
           <div class="stat-card">
             <h3>Total Clicks</h3>
-            <p id="total-clicks">87</p>
+            <p id="total-clicks">{{ total_clicks }}</p>
           </div>
           <div class="stat-card">
             <h3>Click Through Rate</h3>
-            <p id="ctr">27.2%</p>
+            <p id="ctr">{{ ctr }}%</p>
           </div>
         </section>
 
@@ -120,6 +120,20 @@
     <p>Developed by Grant Ombongi Nyamweya &copy; 2025</p>
   </footer>
 
-  <script src="{{url_for('static',filename='dashboard.js')}}"></script>
+  <script>
+      const chartData = {
+          emailsSent: {{ monthly_emails_sent|tojson }},
+          ctr: {{ monthly_ctr|tojson }}
+      };
+  </script>
+
+  <script>
+      const chartData = {
+          emailsSent: {{ monthly_emails_sent|tojson }},
+          ctr: {{ monthly_ctr|tojson }}
+      };
+  </script>
+  <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+
 </body>
 </html>

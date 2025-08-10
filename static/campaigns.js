@@ -65,7 +65,7 @@ function renderCampaigns(data) {
         <button onclick="deleteCampaign(${campaign.id})">Delete</button>
         ${
           campaign.status === "Ongoing"
-            ? `<button onclick="closeCampaign(${campaign.id})">Close Campaign</button>`
+            ? `<button onclick="closeCampaign(${campaign.id}, '${campaign.name}')">Close Campaign</button>`
             : ""
         }
       </div>
@@ -74,18 +74,33 @@ function renderCampaigns(data) {
   });
 }
 
+// Updated closeCampaign with proper feedback
 async function closeCampaign(id) {
+  if (!confirm(`Are you sure you want to close the campaign with ID ${id}?`)) return;
+
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+
   try {
-    const res = await fetch(`/close-campaign/${id}`, { method: "POST" });
+    const res = await fetch(`/close-campaign/${id}`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrfToken
+      }
+    });
+
     if (res.ok) {
+      alert("Campaign closed successfully!");
       loadCampaigns();
     } else {
-      alert("Failed to close campaign");
+      const errorData = await res.json().catch(() => ({}));
+      alert(`Failed to close campaign: ${errorData.error || res.statusText}`);
     }
   } catch (err) {
     console.error(err);
+    alert("An error occurred while trying to close the campaign.");
   }
 }
+
 
 function toggleDetails(id) {
   const el = document.getElementById(id);

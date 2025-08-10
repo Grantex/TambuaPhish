@@ -1,6 +1,10 @@
 import smtplib
+import os
 from email.message import EmailMessage
 from flask import url_for
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def send_phishing_email(recipient_email, template, campaign_id, recipient_id):
     recipient_email = recipient_email.strip()
@@ -37,10 +41,10 @@ To learn more, click the link below:
     msg.add_alternative(html_body, subtype='html')
 
     # ✅ SMTP (Zoho example)
-    smtp_server = "smtp.zoho.com"
-    smtp_port = 587
-    smtp_username = "info@tambuaphish.store"
-    smtp_password = "7Vx4X8Khg6h1"  # ⚠️ Use env vars in production
+    smtp_server = os.getenv("HOST")
+    smtp_port = os.getenv("SMTP_PORT")
+    smtp_username = os.getenv("MAIL_USERNAME")
+    smtp_password = os.getenv("MAIL_PASSWORD")
 
     try:
         with smtplib.SMTP(smtp_server, smtp_port) as server:
