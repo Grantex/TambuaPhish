@@ -78,16 +78,27 @@
                   </td>
                   <td>{{ c.status }}</td>
                   <td>{{ c.start_date.strftime('%Y-%m-%d %H:%M') if c.start_date else 'N/A' }}</td>
+              
                   <td>
                     {% if c.status != 'Completed' %}
-                      <form method="POST" action="{{ url_for('routes.close_campaign', campaign_id=c.id) }}">
-                        <button type="submit">Close</button>
+                      <!-- Close button -->
+                      <form method="POST" action="{{ url_for('routes.close_campaign', campaign_id=c.id) }}" style="display:inline;">
+                        <button type="submit" onclick="return confirm('Are you sure you want to close the campaign with ID {{ c.id }}?')">
+                          Close
+                        </button>
                       </form>
                     {% else %}
                       <em>Closed</em>
                     {% endif %}
+
+                    <!-- Delete button -->
+                    <form method="POST" action="{{ url_for('routes.delete_campaign', campaign_id=c.id) }}" style="display:inline;">
+                      <button type="submit" onclick="return confirm('Are you sure you want to delete campaign ID {{ c.id }}? This action cannot be undone.')">
+                        Delete
+                      </button>
+                    </form>
                   </td>
-                </tr>
+
 
                 <!-- Recipients Detail Row -->
                 <tr class="recipient-details">

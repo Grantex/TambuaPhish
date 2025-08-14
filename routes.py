@@ -7,7 +7,7 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
 from models import db, User, CustomEmailTemplate, Campaign, Recipient
 from forms import (
-    RegistrationForm, LoginForm, ForgotPasswordForm, ResetPasswordForm
+    RegistrationForm, LoginForm, ForgotPasswordForm, ResetPasswordForm, EditTemplateForm
 )
 
 from flask import Blueprint
@@ -17,6 +17,7 @@ from datetime import datetime
 from phishing_email_function import send_phishing_email
 from flask import session
 from models import User
+
 #from flask_login import current_user, login_required
 
 routes_bp = Blueprint('routes', __name__)
@@ -217,7 +218,13 @@ from datetime import datetime
 from flask import render_template, redirect, url_for, session, request
 from models import Campaign
 from sqlalchemy.orm import joinedload
+from datetime import datetime
+from flask import jsonify
 
+from flask import request
+from flask_wtf.csrf import CSRFProtect
+
+csrf = CSRFProtect()
 
 
 @routes_bp.route('/campaigns')
@@ -272,34 +279,55 @@ def get_campaigns():
 
 
 # NEW: Close campaign route
+
+from flask import redirect, url_for, flash
 from datetime import datetime
-from flask import jsonify
-
-from flask import request
-from flask_wtf.csrf import CSRFProtect
-
-csrf = CSRFProtect()
 
 @routes_bp.route("/close-campaign/<int:campaign_id>", methods=["POST"])
 def close_campaign(campaign_id):
     if "username" not in session:
-        return jsonify({"error": "Not logged in"}), 401
+        flash("Not logged in", "error")
+        return redirect(url_for("routes.get_campaigns"))
 
-    # Get the logged-in user from the database
     user = User.query.filter_by(username=session["username"]).first()
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        flash("User not found", "error")
+        return redirect(url_for("routes.get_campaigns"))
 
-    # Fetch campaign and ensure it belongs to the logged-in user
     campaign = Campaign.query.get(campaign_id)
     if not campaign or campaign.user_id != user.id:
-        return jsonify({"error": "Campaign not found or unauthorized"}), 404
+        flash("Campaign not found or unauthorized", "error")
+        return redirect(url_for("routes.get_campaigns"))
 
-    campaign.status = "Closed"
+    campaign.status = "Completed"
     campaign.end_date = datetime.utcnow()
     db.session.commit()
 
-    return jsonify({"message": "Campaign closed successfully"}), 200
+    flash("Campaign closed successfully", "success")
+    return redirect(url_for("routes.get_campaigns"))
+
+
+@routes_bp.route("/delete-campaign/<int:campaign_id>", methods=["POST"])
+def delete_campaign(campaign_id):
+    if "username" not in session:
+        flash("Not logged in", "error")
+        return redirect(url_for("routes.get_campaigns"))
+
+    user = User.query.filter_by(username=session["username"]).first()
+    if not user:
+        flash("User not found", "error")
+        return redirect(url_for("routes.get_campaigns"))
+
+    campaign = Campaign.query.get(campaign_id)
+    if not campaign or campaign.user_id != user.id:
+        flash("Campaign not found or unauthorized", "error")
+        return redirect(url_for("routes.get_campaigns"))
+
+    db.session.delete(campaign)
+    db.session.commit()
+
+    flash("Campaign deleted successfully", "success")
+    return redirect(url_for("routes.get_campaigns"))
 
 
 
@@ -405,7 +433,7 @@ def edit_template(template_id):
         template.email_body = form.email_body.data
         db.session.commit()
         flash("Template updated successfully.", "success")
-        return redirect(url_for('routes.dashboard'))
+        return redirect(url_for('routes.phishing_templates'))
 
     # Pre-fill form only on GET
     if request.method == 'GET':
@@ -414,7 +442,7 @@ def edit_template(template_id):
         form.subject.data = template.subject
         form.email_body.data = template.email_body
 
-    return render_template('edit.html', form=form, template=template)
+    return render_template('edit_template.html', form=form, template=template)
 
 #----Delete Template----------------
 
@@ -423,15 +451,22 @@ def delete_template(template_id):
     if 'user_id' not in session:
         return redirect(url_for('routes.login'))
 
-    template = CustomEmailTemplate.query.filter_by(id=template_id, user_id=session['user_id']).first()
+    template = CustomEmailTemplate.query.get_or_404(template_id)
 
-    if not template:
-        flash('Template not found or unauthorized access.', 'danger')
+    # Check ownership
+    if template.user_id != session['user_id']:
+        flash("Unauthorized access.", "danger")
+        return redirect(url_for('routes.phishing_templates'))
+
+    # Check if campaigns use it
+    campaigns_using = Campaign.query.filter_by(template_id=template.id).count()
+    if campaigns_using > 0:
+        flash("This template is used in existing campaigns and cannot be deleted.", "danger")
         return redirect(url_for('routes.phishing_templates'))
 
     db.session.delete(template)
     db.session.commit()
-    flash('Template deleted successfully.', 'success')
+    flash("Template deleted successfully.", "success")
     return redirect(url_for('routes.phishing_templates'))
 
 

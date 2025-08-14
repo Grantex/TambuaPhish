@@ -101,6 +101,36 @@ async function closeCampaign(id) {
   }
 }
 
+//delete campaign-------------------------------------------
+
+async function deleteCampaign(id) {
+  if (!confirm(`Are you sure you want to delete campaign ID ${id}? This action cannot be undone.`)) return;
+
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+
+  try {
+    const res = await fetch(`/delete-campaign/${id}`, {
+      method: "DELETE",
+      headers: {
+        "X-CSRFToken": csrfToken
+      }
+    });
+
+    if (res.ok) {
+      alert("Campaign deleted successfully!");
+      loadCampaigns();
+    } else {
+      const errorData = await res.json().catch(() => ({}));
+      alert(`Failed to delete campaign: ${errorData.error || res.statusText}`);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("An error occurred while trying to delete the campaign.");
+  }
+}
+
+
+
 
 function toggleDetails(id) {
   const el = document.getElementById(id);
