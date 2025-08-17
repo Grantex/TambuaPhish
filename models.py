@@ -22,6 +22,7 @@ class User(db.Model):
     email_verified = db.Column(db.Boolean, default=False)
 
     templates = db.relationship('CustomEmailTemplate', backref='creator', lazy=True)
+    modules = db.relationship("TrainingModule", back_populates="user")
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -58,3 +59,16 @@ class Recipient(db.Model):
     sent_at = db.Column(db.DateTime, default=datetime.now())
 
 
+class TrainingModule(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String(100), nullable=False)
+    format = db.Column(db.String(50), nullable=False)
+    duration = db.Column(db.Integer, nullable=False)
+    content = db.Column(db.Text, nullable=False)  # stores links/materials
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    #Relationships
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship("User", back_populates="modules")

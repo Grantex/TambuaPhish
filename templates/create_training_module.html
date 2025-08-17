@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Module - TambuaPhish</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='training_modules.css') }}"/>
+</head>
+<body>
+  <!-- Header -->
+  <header class="main-header">
+    <div class="header-left">
+      <h1>TambuaPhish</h1>
+    </div>
+    <div class="header-right">
+      <p>Welcome, {{ username }}</p>
+      <a href="/logout" class="logout-button">Logout</a>
+    </div>
+  </header>
+
+  <!-- Sidebar + Main Content -->
+  <div class="dashboard-wrapper">
+    <aside class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="{{url_for('routes.dashboard')}}">Dashboard</a></li>
+          <li><a href="{{url_for('routes.campaigns')}}">Campaigns</a></li>
+          <li><a href="{{url_for('routes.phishing_templates')}}">Phishing Templates</a></li>
+          <li><a href="{{url_for('routes.start_a_campaign')}}">Start a Campaign</a></li>
+          <li><a href="{{url_for('routes.training_modules')}}">Training Modules</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <h1>Create Training Module</h1>
+      
+      <form method="POST" action="{{ url_for('routes.save_module') }}" class="module-form">
+        {{ form.hidden_tag() }}
+        
+        <label for="title">Title:</label>
+        {{ form.title(class="form-control") }}
+        {% for error in form.title.errors %}
+          <span class="error">{{ error }}</span>
+        {% endfor %}
+
+        <label for="description">Description:</label>
+        {{ form.description(class="form-control") }}
+        {% for error in form.description.errors %}
+          <span class="error">{{ error }}</span>
+        {% endfor %}
+
+        <label for="category">Category:</label>
+        {{ form.category(class="form-control") }}
+        {% for error in form.category.errors %}
+          <span class="error">{{ error }}</span>
+        {% endfor %}
+
+        <label for="format">Format:</label>
+        {{ form.format(class="form-control") }}
+        {% for error in form.format.errors %}
+          <span class="error">{{ error }}</span>
+        {% endfor %}
+
+        <label for="duration">Duration (min):</label>
+        {{ form.duration(class="form-control") }}
+        {% for error in form.duration.errors %}
+          <span class="error">{{ error }}</span>
+        {% endfor %}
+
+        <label for="content">Content Link/Upload:</label>
+        {{ form.content(class="form-control") }}
+        {% for error in form.content.errors %}
+          <span class="error">{{ error }}</span>
+        {% endfor %}
+
+        <!-- Button Group -->
+        <div class="form-actions">
+          <button type="submit" class="primary-btn">Save Module</button>
+          <a href="{{ url_for('routes.training_modules') }}" class="secondary-btn">✖ Cancel</a>
+        </div>
+      </form>
+    </main>
+  </div> <!-- END dashboard-wrapper -->
+
+  <!-- Footer -->
+  <footer>
+    <p>Developed by Grant Ombongi Nyamweya &copy; 2025</p>
+  </footer>
+</body>
+</html>

@@ -5,9 +5,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
-from models import db, User, CustomEmailTemplate, Campaign, Recipient
+from models import db, User, CustomEmailTemplate, Campaign, Recipient, TrainingModule
 from forms import (
-    RegistrationForm, LoginForm, ForgotPasswordForm, ResetPasswordForm, EditTemplateForm
+    RegistrationForm, LoginForm, ForgotPasswordForm, ResetPasswordForm, EditTemplateForm, TrainingModuleForm
 )
 
 from flask import Blueprint
@@ -674,11 +674,76 @@ def launch_campaign():
 
 
 # --- Training Modules ---
+
 @routes_bp.route('/training-modules')
 def training_modules():
+    if 'username' not in session or 'user_id' not in session:
+        return redirect(url_for('routes.login'))
+
+    # Fetch modules only for the logged-in user
+    #modules = TrainingModule.query.filter_by(user_id=session['username']).all()
+
+    user = User.query.filter_by(username=session['username']).first()
+    modules = TrainingModule.query.filter_by(user_id=session['username']).all()
+
+    return render_template(
+        'training_modules.html',
+        username=session['username'],
+        modules=modules
+    )
+
+
+# =========================
+# Create Module (Show Form)
+# =========================
+@routes_bp.route('/create-training-module', methods=['GET', 'POST'])
+def create_training_module():
     if 'username' not in session:
         return redirect(url_for('routes.login'))
-    return render_template('training_modules.html', username=session['username'])
+
+    form = TrainingModuleForm()
+    if form.validate_on_submit():
+        new_module = TrainingModule(
+            title=form.title.data,
+            description=form.description.data,
+            category=form.category.data,
+            format=form.format.data,
+            duration=form.duration.data,
+            content=form.content.data
+        )
+        db.session.add(new_module)
+        db.session.commit()
+        return redirect(url_for('routes.training_modules'))
+
+    return render_template('create_training_module.html', form=form, username=session['username'])
+
+# =========================
+# Save Module (Form POST)
+# =========================
+@routes_bp.route('/save-module', methods=['POST'])
+
+def save_module():
+    if 'username' not in session:
+        return redirect(url_for('routes.login'))
+    
+    form = TrainingModuleForm()
+    if form.validate_on_submit():
+        new_module = TrainingModule(
+            title=form.title.data,
+            description=form.description.data,
+            category=form.category.data,
+            format=form.format.data,
+            duration=form.duration.data,
+            content=form.content.data,
+            user_id=session['username']   # 🔑 save who created it
+        )
+        db.session.add(new_module)
+        db.session.commit()
+        flash('Module saved successfully!', 'success')
+        return redirect(url_for('routes.training_modules'))
+    else:
+        flash('Error saving module. Please check your inputs.', 'danger')
+        return redirect(url_for('routes.create_module'))
 
 
 # --- Logout ---

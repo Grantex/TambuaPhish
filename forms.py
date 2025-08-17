@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, HiddenField
+from wtforms import StringField, PasswordField, SubmitField, HiddenField, TextAreaField, SelectField, IntegerField
 from wtforms.validators import (
-    DataRequired, Length, Email, EqualTo, ValidationError, Regexp
+    DataRequired, Length, Email, EqualTo, ValidationError, Regexp, NumberRange, URL
 )
 from wtforms import HiddenField
 from models import User
@@ -79,3 +79,36 @@ class EditTemplateForm(FlaskForm):
     submit = SubmitField('Update Template')
 
 
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, IntegerField, SelectField, SubmitField
+from wtforms.validators import DataRequired, NumberRange, URL, Optional
+
+class TrainingModuleForm(FlaskForm):
+    title = StringField("Title", validators=[DataRequired()])
+    description = TextAreaField("Description", validators=[DataRequired()])
+    category = SelectField(
+        "Category",
+        choices=[
+            ("Phishing Basics", "Phishing Basics"),
+            ("Email Security", "Email Security"),
+            ("Social Engineering", "Social Engineering"),
+            ("Other", "Other"),
+        ],
+        validators=[DataRequired()]
+    )
+    format = SelectField(
+        "Format",
+        choices=[
+            ("Video", "Video"),
+            ("PDF", "PDF"),
+            ("Interactive", "Interactive"),
+            ("Link", "Link"),
+        ],
+        validators=[DataRequired()]
+    )
+    duration = IntegerField("Duration (min)", validators=[DataRequired(), NumberRange(min=1)])
+    
+    # Use TextAreaField so it can hold long/multiple links
+    content = TextAreaField("Content (Link/Upload)", validators=[DataRequired()])
+    
+    submit = SubmitField("Save Module")
