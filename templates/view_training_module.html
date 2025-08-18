@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>View Module - {{ module.title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='training_modules.css') }}">
+</head>
+<body>
+  <header class="main-header">
+    <h1>{{ module.title }}</h1>
+    <a href="{{ url_for('routes.training_modules') }}" class="secondary-btn">Back</a>
+  </header>
+
+  <main>
+    <p><strong>Description:</strong> {{ module.description }}</p>
+    <p><strong>Category:</strong> {{ module.category }}</p>
+    <p><strong>Duration:</strong> {{ module.duration }} minutes</p>
+    <p><strong>Format:</strong> {{ module.format }}</p>
+
+    {% if module.content %}
+        <p><strong>Content Link:</strong> 
+        <a href="{{ module.content }}" target="_blank">{{ module.content }}</a>
+        </p>
+    {% else %}
+        <p><strong>Content Link:</strong> None</p>
+    {% endif %}
+
+  </main>
+
+  <footer>
+    <p>Developed by Grant Ombongi Nyamweya &copy; 2025</p>
+  </footer>
+</body>
+</html>

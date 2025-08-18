@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ module.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='training_modules.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>{{ module.title }}</h2>
+    <p><strong>Description:</strong> {{ module.description }}</p>
+    <p><strong>Category:</strong> {{ module.category }}</p>
+    <p><strong>Duration:</strong> {{ module.duration }}</p>
+    <p><strong>Format:</strong> {{ module.format }}</p>
+    <p><a href="{{ module.content }}" target="_blank">Start Training</a></p>
+</div>
+</body>
+</html>

@@ -270,7 +270,7 @@ footer p {
   margin: 40px auto 40px 110px;
   display: flex;
   flex-direction: column;
-  gap: 20px; /* spacing between fields */
+  gap: 19px; /* spacing between fields */
 }
 
 .module-form h1 {
@@ -288,13 +288,20 @@ footer p {
 }
 
 .module-form .form-control {
-  width: 150%;
-  padding: 12px 14px;
+  width: 150%; /* was 150%, fixed */
+  padding: 20px 14px;
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 1rem;
   transition: all 0.2s ease-in-out;
+  box-sizing: border-box;
 }
+
+.module-form textarea.form-control {
+  min-height: 100px;
+  resize: vertical;
+}
+
 
 .module-form .form-control:focus {
   border-color: #0b3d91;
@@ -340,4 +347,20 @@ footer p {
 
 .form-actions .btn-secondary:hover {
   background-color: #aaa;
+}
+
+/*delete button on the training module cards styling*/
+
+.delete-btn {
+  background-color: #e74c3c; /* red */
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.delete-btn:hover {
+  background-color: #c0392b; /* darker red on hover */
 }

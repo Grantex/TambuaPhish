@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Training Module</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='training_modules.css') }}">
+</head>
+<body>
+  <header class="main-header">
+    <h1>Edit Training Module</h1>
+    <a href="{{ url_for('routes.training_modules') }}" class="secondary-btn">Back</a>
+  </header>
+
+  <div class="module-form">
+    <form method="POST">
+        
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <label for="title">Title</label>
+      <input type="text" name="title" id="title" class="form-control" value="{{ module.title }}" required>
+
+      <label for="description">Description</label>
+      <textarea name="description" id="description" class="form-control" required>{{ module.description }}</textarea>
+
+      <label for="category">Category</label>
+      <select name="category" id="category" class="form-control">
+        <option value="Phishing Basics" {% if module.category == 'Phishing Basics' %}selected{% endif %}>Phishing Basics</option>
+        <option value="Email Security" {% if module.category == 'Email Security' %}selected{% endif %}>Email Security</option>
+        <option value="Social Engineering" {% if module.category == 'Social Engineering' %}selected{% endif %}>Social Engineering</option>
+        <option value="Other" {% if module.category == 'Other' %}selected{% endif %}>Other</option>
+      </select>
+
+      <label for="duration">Duration (minutes)</label>
+      <input type="number" name="duration" id="duration" class="form-control" value="{{ module.duration }}" required>
+
+      <label for="format">Format</label>
+      <select name="format" id="format" class="form-control">
+        <option value="Video" {% if module.format == 'Video' %}selected{% endif %}>Video</option>
+        <option value="PDF" {% if module.format == 'PDF' %}selected{% endif %}>PDF</option>
+        <option value="Interactive" {% if module.format == 'Interactive' %}selected{% endif %}>Interactive</option>
+      </select>
+
+      <label for="content">Content Link</label>
+      <input type="url" name="content" id="content" class="form-control" value="{{ module.content }}" placeholder="https://example.com/training-material" required>
+
+      <button type="submit" class="primary-btn">Update Module</button>
+    </form>
+  </div>
+</body>
+</html>

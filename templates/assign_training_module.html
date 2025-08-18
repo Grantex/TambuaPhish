@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Assign Training Module</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='training_modules.css') }}">
+</head>
+<body>
+  <div class="module-form">
+    <h1>Assign Training Module</h1>
+
+    <form method="POST" action="{{ url_for('routes.assign_training_module') }}">
+      {{ form.hidden_tag() }}
+
+      <!-- Dropdown to select training module -->
+      <div class="form-group">
+        {{ form.module_id.label }}
+        {{ form.module_id(class="form-control") }}
+      </div>
+
+      <!-- Recipient emails -->
+      <div class="form-group">
+        {{ form.emails.label }}
+        {{ form.emails(class="form-control", rows="5", placeholder="e.g. user1@example.com, user2@example.com") }}
+      </div>
+
+      <!-- Custom message -->
+      <div class="form-group">
+        {{ form.message.label }}
+        {{ form.message(class="form-control", rows="4", placeholder="Add a short note...") }}
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Send Assignment</button>
+        <a href="{{ url_for('routes.training_modules') }}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

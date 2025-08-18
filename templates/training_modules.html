@@ -69,10 +69,30 @@
             <span>Duration: {{ module.duration }} min</span>
             <span>Format: {{ module.format }}</span>
           </div>
+
           <div class="card-actions">
-            <button class="secondary-btn">View</button>
-            <button class="primary-btn">Assign</button>
+            <!-- View -->
+            <a href="{{ url_for('routes.view_training_module', module_id=module.id) }}" class="secondary-btn">View</a>
+
+            <!-- Edit -->
+            <a href="{{ url_for('routes.edit_training_module', module_id=module.id) }}" class="secondary-btn">Edit</a>
+
+            <!-- Assign -->
+            <a href="{{ url_for('routes.assign_training_module', module_id=module.id) }}" class="primary-btn">Assign</a>
+
+            <!-- Delete -->
+            <form action="{{ url_for('routes.delete_training_module', module_id=module.id) }}" 
+                  method="POST" 
+                  style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="delete-btn" 
+                      onclick="return confirm('Are you sure you want to delete this module?');">
+                Delete
+              </button>
+            </form>
+
           </div>
+
         </div>
         {% endfor %}
       </div>

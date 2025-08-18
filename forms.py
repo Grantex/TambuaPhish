@@ -112,3 +112,12 @@ class TrainingModuleForm(FlaskForm):
     content = TextAreaField("Content (Link/Upload)", validators=[DataRequired()])
     
     submit = SubmitField("Save Module")
+
+
+
+
+class AssignForm(FlaskForm):
+    module_id = SelectField("Select Training Module", coerce=int, validators=[DataRequired()])
+    emails = TextAreaField("Recipient Emails (comma-separated)", validators=[DataRequired()])
+    message = TextAreaField("Custom Message (optional)", validators=[Optional()])
+    submit = SubmitField("Send Assignment")

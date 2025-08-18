@@ -72,3 +72,25 @@ class TrainingModule(db.Model):
     #Relationships
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", back_populates="modules")
+
+
+
+class Assignment(db.Model):
+    __tablename__ = "assignments"
+
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Link to training module
+    module_id = db.Column(db.Integer, db.ForeignKey("training_module.id"), nullable=False)
+    
+    # Store emails (comma-separated string for now)
+    emails = db.Column(db.Text, nullable=False)
+    
+    # Optional message
+    message = db.Column(db.Text, nullable=True)
+    
+    # Timestamp
+    assigned_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationship
+    module = db.relationship("TrainingModule", backref=db.backref("assignments", lazy=True))

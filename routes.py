@@ -5,9 +5,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 
-from models import db, User, CustomEmailTemplate, Campaign, Recipient, TrainingModule
+from models import db, User, CustomEmailTemplate, Campaign, Recipient, TrainingModule, Assignment
 from forms import (
-    RegistrationForm, LoginForm, ForgotPasswordForm, ResetPasswordForm, EditTemplateForm, TrainingModuleForm
+    RegistrationForm, LoginForm,ForgotPasswordForm, ResetPasswordForm, EditTemplateForm, TrainingModuleForm, AssignForm
 )
 
 from flask import Blueprint
@@ -15,8 +15,10 @@ from flask_wtf.csrf import generate_csrf
 from flask import jsonify
 from datetime import datetime
 from phishing_email_function import send_phishing_email
+from training_assignment_email_function import send_assignment_email
 from flask import session
 from models import User
+
 
 #from flask_login import current_user, login_required
 
@@ -744,6 +746,151 @@ def save_module():
     else:
         flash('Error saving module. Please check your inputs.', 'danger')
         return redirect(url_for('routes.create_module'))
+
+
+#-----buttons in Training Module---------#
+
+#------------------View-------------------#
+@routes_bp.route('/training_modules/<int:module_id>')
+def view_training_module(module_id):
+    if 'username' not in session:
+        return redirect(url_for('routes.login'))
+
+    module = TrainingModule.query.get_or_404(module_id)
+    return render_template('view_training_module.html', module=module)
+
+#------------------Edit-------------------#
+@routes_bp.route('/training_modules/edit/<int:module_id>', methods=['GET', 'POST'])
+def edit_training_module(module_id):
+    if 'username' not in session:
+        return redirect(url_for('routes.login'))
+
+    module = TrainingModule.query.get(module_id)
+
+    if not module:
+        flash("Module not found!", "danger")
+        return redirect(url_for('routes.training_modules'))
+
+    if request.method == 'POST':
+        module.title = request.form['title']
+        module.description = request.form['description']
+        module.category = request.form['category']
+        module.duration = request.form['duration']
+        module.format = request.form['format']
+        module.content = request.form ['content']
+
+        db.session.commit()
+
+        flash("Training module updated successfully!", "success")
+        return redirect(url_for('routes.training_modules'))
+
+    return render_template("edit_training_module.html", module=module)
+
+
+
+#------------------Assign-------------------#
+
+
+@routes_bp.route('/assign_training_module', methods=['GET', 'POST'])
+def assign_training_module():
+    if 'username' not in session:
+        return redirect(url_for('routes.login'))
+
+    # Fetch modules owned by this user
+    modules = TrainingModule.query.filter_by(user_id=session['username']).all()
+
+    # Create form and populate choices dynamically
+    form = AssignForm()
+    form.module_id.choices = [(m.id, m.title) for m in modules]
+
+    if form.validate_on_submit():
+        selected_module_id = form.module_id.data
+        emails = form.emails.data
+        message = form.message.data
+
+        module = TrainingModule.query.get_or_404(selected_module_id)
+
+        # Ensure the logged-in user owns this module
+        if module.user_id != session['username']:
+            flash("Unauthorized access.", "danger")
+            return redirect(url_for('routes.training_modules'))
+
+        # Save assignment to DB
+        assignment = Assignment(
+            module_id=selected_module_id,
+            emails=emails,
+            message=message
+        )
+        db.session.add(assignment)
+        db.session.commit()
+
+        # ✅ Use your new function to send assignment emails
+        if emails:
+            email_list = [e.strip() for e in emails.split(",") if e.strip()]
+            for email in email_list:
+                send_assignment_email(email, module, message)
+
+        flash("Training module assigned successfully!", "success")
+        return redirect(url_for("routes.training_modules"))
+
+    return render_template("assign_training_module.html", form=form, modules=modules)
+
+
+#-----------------public facing training content configuration---------------#
+
+from itsdangerous import URLSafeSerializer, BadSignature
+from flask import current_app
+
+# Generate a serializer (secret key is from app config)
+def get_serializer():
+    return URLSafeSerializer(current_app.config['SECRET_KEY'], salt="training-module")
+
+@routes_bp.route('/public_training/<token>')
+def public_training_module(token):
+    serializer = get_serializer()
+    try:
+        # Decode the token to get the actual module_id + recipient
+        data = serializer.loads(token)  # data is a dict, e.g. {"module_id": 11, "recipient": "someone@example.com"}
+        module_id = data.get("module_id")
+        recipient = data.get("recipient")
+    except BadSignature:
+        return "Invalid or expired link.", 403
+
+    module = TrainingModule.query.get_or_404(module_id)
+
+    # (Optional) You could later log or verify recipient here
+    # e.g. check if this recipient actually belongs to the campaign
+
+    return render_template('public_training_module.html', module=module, recipient=recipient)
+
+
+
+
+#------------------Delete-------------------#
+
+
+@routes_bp.route('/delete_training_module/<int:module_id>', methods=['POST'])
+def delete_training_module(module_id):
+    if 'username' not in session:
+        return redirect(url_for('routes.login'))
+
+    module = TrainingModule.query.get_or_404(module_id)
+
+    # Ensure the logged-in user owns this module
+    if module.user_id != session['username']:
+        flash("You are not authorized to delete this training module.", "danger")
+        return redirect(url_for('routes.training_modules'))
+
+    try:
+        db.session.delete(module)
+        db.session.commit()
+        flash("Training module deleted successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("An error occurred while deleting the training module.", "danger")
+
+    return redirect(url_for('routes.training_modules'))
+
 
 
 # --- Logout ---
