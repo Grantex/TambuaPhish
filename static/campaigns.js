@@ -18,7 +18,7 @@ function renderCampaigns(data) {
   campaignList.innerHTML = "";
 
   if (data.length === 0) {
-    campaignList.innerHTML += "<p>No campaigns match the filters.</p>";
+    campaignList.innerHTML += "<p>Launch some campaigns to see them here.</p>";
     return;
   }
 
@@ -61,7 +61,7 @@ function renderCampaigns(data) {
               : "<li>No recipients</li>"
           }
         </ol>
-        <button onclick="alert('Generate report for ${campaign.name}')">View Report</button>
+        <button onclick="viewReport(${campaign.id})">View Report</button>
         <button onclick="deleteCampaign(${campaign.id})">Delete</button>
         ${
           campaign.status === "Ongoing"
@@ -74,7 +74,12 @@ function renderCampaigns(data) {
   });
 }
 
-// Updated closeCampaign with proper feedback
+// 🟢 Redirect to the report page
+function viewReport(campaignId) {
+  window.location.href = `/campaign/${campaignId}/report`;
+}
+
+// Close campaign
 async function closeCampaign(id) {
   if (!confirm(`Are you sure you want to close the campaign with ID ${id}?`)) return;
 
@@ -101,8 +106,7 @@ async function closeCampaign(id) {
   }
 }
 
-//delete campaign-------------------------------------------
-
+// Delete campaign
 async function deleteCampaign(id) {
   if (!confirm(`Are you sure you want to delete campaign ID ${id}? This action cannot be undone.`)) return;
 
@@ -128,9 +132,6 @@ async function deleteCampaign(id) {
     alert("An error occurred while trying to delete the campaign.");
   }
 }
-
-
-
 
 function toggleDetails(id) {
   const el = document.getElementById(id);

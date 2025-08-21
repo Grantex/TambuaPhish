@@ -28,7 +28,7 @@ class User(db.Model):
         return f'<User {self.username}>'
 
 
-# Campaign model — now only linked to recipients, no "Target" table
+# Campaign model 
 class Campaign(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

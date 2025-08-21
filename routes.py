@@ -10,7 +10,7 @@ from forms import (
     RegistrationForm, LoginForm,ForgotPasswordForm, ResetPasswordForm, EditTemplateForm, TrainingModuleForm, AssignForm
 )
 
-from flask import Blueprint
+from flask import Blueprint, render_template, url_for, send_file
 from flask_wtf.csrf import generate_csrf
 from flask import jsonify
 from datetime import datetime
@@ -18,11 +18,15 @@ from phishing_email_function import send_phishing_email
 from training_assignment_email_function import send_assignment_email
 from flask import session
 from models import User
+import json
+import tempfile
+from playwright.sync_api import sync_playwright
 
-
-#from flask_login import current_user, login_required
 
 routes_bp = Blueprint('routes', __name__)
+
+
+
 
 # --- Helper: Send Email ---
 def send_verification_email(to_email, subject, body_html):
@@ -248,6 +252,8 @@ def campaigns():
 
 @routes_bp.route("/api/campaigns")
 def get_campaigns():
+    if 'username' not in session:
+        return redirect(url_for('routes.login'))
     campaigns = Campaign.query.filter_by(user_id=session["username"]).all()
     result = []
 
@@ -282,8 +288,6 @@ def get_campaigns():
 
 # NEW: Close campaign route
 
-from flask import redirect, url_for, flash
-from datetime import datetime
 
 @routes_bp.route("/close-campaign/<int:campaign_id>", methods=["POST"])
 def close_campaign(campaign_id):
@@ -301,15 +305,15 @@ def close_campaign(campaign_id):
         flash("Campaign not found or unauthorized", "error")
         return redirect(url_for("routes.get_campaigns"))
 
-    campaign.status = "Completed"
-    campaign.end_date = datetime.utcnow()
+    campaign.mark_completed()
     db.session.commit()
 
     flash("Campaign closed successfully", "success")
     return redirect(url_for("routes.get_campaigns"))
 
 
-@routes_bp.route("/delete-campaign/<int:campaign_id>", methods=["POST"])
+
+@routes_bp.route("/delete-campaign/<int:campaign_id>", methods=["DELETE"])
 def delete_campaign(campaign_id):
     if "username" not in session:
         flash("Not logged in", "error")
@@ -331,9 +335,83 @@ def delete_campaign(campaign_id):
     flash("Campaign deleted successfully", "success")
     return redirect(url_for("routes.get_campaigns"))
 
+#------------Campaign Report-------------------------------------
 
 
 
+@routes_bp.route("/campaign/<int:campaign_id>/report")
+def view_report(campaign_id):
+    # Fetch campaign or 404
+    campaign = Campaign.query.get_or_404(campaign_id)
+
+    # Metrics
+    total_recipients = Recipient.query.filter_by(campaign_id=campaign_id).count()
+    total_clicks = Recipient.query.filter_by(campaign_id=campaign_id, has_clicked=True).count()
+    ctr = round((total_clicks / total_recipients) * 100, 2) if total_recipients > 0 else 0
+
+    metrics = {
+        "total_recipients": total_recipients,
+        "total_clicks": total_clicks,
+        "ctr": ctr
+    }
+
+    # Recipient activity breakdown
+    recipients = Recipient.query.filter_by(campaign_id=campaign_id).all()
+    recipient_data = []
+    for r in recipients:
+        status = "Clicked" if r.has_clicked else "Not Clicked"
+        if r.has_clicked and r.clicked_at:
+            status += f" at {r.clicked_at.strftime('%Y-%m-%d %H:%M:%S')}"
+        recipient_data.append({
+            "email": r.email,
+            "status": status,
+            "timestamp": r.clicked_at.strftime("%Y-%m-%d %H:%M:%S") if r.clicked_at else None
+        })
+
+    # Timeline data: group clicks by date
+    clicks_by_date = {}
+    for r in recipients:
+        if r.has_clicked and r.clicked_at:
+            date_str = r.clicked_at.date().isoformat()
+            clicks_by_date[date_str] = clicks_by_date.get(date_str, 0) + 1
+
+    timeline_labels = list(clicks_by_date.keys())
+    timeline_data = list(clicks_by_date.values())
+
+    return render_template(
+        "report.html",
+        campaign={
+            "id": campaign.id,
+            "name": campaign.name,
+            "description": campaign.description,
+            "status": campaign.status,
+            "start_date": campaign.start_date.strftime("%Y-%m-%d"),
+            "end_date": campaign.end_date.strftime("%Y-%m-%d") if campaign.end_date else None,
+            "owner": campaign.user.username if campaign.user else "Unknown",
+            "template_id": campaign.template.id if campaign.template else "Unknown"
+        },
+        metrics=metrics,
+        recipients=recipient_data,
+        timeline={"labels": json.dumps(timeline_labels), "data": json.dumps(timeline_data)}
+    )
+
+@routes_bp.route("/campaign/<int:campaign_id>/report/download")
+def download_report(campaign_id):
+    # Generate PDF using Playwright
+    url = url_for("routes.view_report", campaign_id=campaign_id, _external=True)
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        page.goto(url, wait_until="networkidle")
+        # Export to a temporary PDF
+        tmp_pdf = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+        page.pdf(path=tmp_pdf.name, format="A4")
+        browser.close()
+
+    return send_file(tmp_pdf.name, as_attachment=True, download_name=f"campaign_{campaign_id}_report.pdf")
+
+#-----------------------------------------------------------------------------------------------------------
 
 from datetime import datetime
 
@@ -358,21 +436,6 @@ def track_link(campaign_id, recipient_id):
 @routes_bp.route('/phish-landing')
 def phish_landing():
     return render_template('phish_busted.html')
-
-
-# --- Close Campaign ---
-# @routes_bp.route('/close-campaign/<int:campaign_id>', methods=['POST'])
-# def close_campaign(campaign_id):
-#     if 'username' not in session:
-#         return redirect(url_for('routes.login'))
-
-#     campaign = Campaign.query.get_or_404(campaign_id)
-#     campaign.status = "Completed"
-#     campaign.end_date = datetime.utcnow()
-
-#     db.session.commit()
-
-#     return redirect(url_for('routes.campaigns'))
 
 
 
