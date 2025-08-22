@@ -337,12 +337,22 @@ def delete_campaign(campaign_id):
 
 #------------Campaign Report-------------------------------------
 
-
-
 @routes_bp.route("/campaign/<int:campaign_id>/report")
 def view_report(campaign_id):
+    is_pdf = request.args.get("pdf", "0") == "1"
+
+    # Only enforce login if not rendering for PDF
+    if not session.get('username') and not is_pdf:
+        return redirect('/login')
+
     # Fetch campaign or 404
     campaign = Campaign.query.get_or_404(campaign_id)
+
+    # Resolve owner: use campaign.user if available, else fallback to session or query param
+    resolved_owner = (
+        campaign.user.username if campaign.user
+        else session.get('username') or request.args.get('username', 'Unknown')
+    )
 
     # Metrics
     total_recipients = Recipient.query.filter_by(campaign_id=campaign_id).count()
@@ -359,20 +369,24 @@ def view_report(campaign_id):
     recipients = Recipient.query.filter_by(campaign_id=campaign_id).all()
     recipient_data = []
     for r in recipients:
-        status = "Clicked" if r.has_clicked else "Not Clicked"
         if r.has_clicked and r.clicked_at:
-            status += f" at {r.clicked_at.strftime('%Y-%m-%d %H:%M:%S')}"
+            status = "Clicked"
+            timestamp = r.clicked_at.strftime("%b %d %Y")
+        else:
+            status = "Not Clicked"
+            timestamp = None
+
         recipient_data.append({
             "email": r.email,
             "status": status,
-            "timestamp": r.clicked_at.strftime("%Y-%m-%d %H:%M:%S") if r.clicked_at else None
+            "timestamp": timestamp
         })
 
-    # Timeline data: group clicks by date
+    # Timeline data
     clicks_by_date = {}
     for r in recipients:
         if r.has_clicked and r.clicked_at:
-            date_str = r.clicked_at.date().isoformat()
+            date_str = r.clicked_at.strftime("%b %d %Y")
             clicks_by_date[date_str] = clicks_by_date.get(date_str, 0) + 1
 
     timeline_labels = list(clicks_by_date.keys())
@@ -385,20 +399,25 @@ def view_report(campaign_id):
             "name": campaign.name,
             "description": campaign.description,
             "status": campaign.status,
-            "start_date": campaign.start_date.strftime("%Y-%m-%d"),
-            "end_date": campaign.end_date.strftime("%Y-%m-%d") if campaign.end_date else None,
-            "owner": campaign.user.username if campaign.user else "Unknown",
-            "template_id": campaign.template.id if campaign.template else "Unknown"
+            "start_date": campaign.start_date.strftime("%b %d %Y"),
+            "end_date": campaign.end_date.strftime("%b %d %Y") if campaign.end_date else None,
+            "owner": resolved_owner,
+            "template_name": campaign.template.template_name if campaign.template else "Unknown"
         },
         metrics=metrics,
         recipients=recipient_data,
-        timeline={"labels": json.dumps(timeline_labels), "data": json.dumps(timeline_data)}
+        timeline={"labels": json.dumps(timeline_labels), "data": json.dumps(timeline_data)},
+        is_pdf=is_pdf
     )
+
+
 
 @routes_bp.route("/campaign/<int:campaign_id>/report/download")
 def download_report(campaign_id):
     # Generate PDF using Playwright
-    url = url_for("routes.view_report", campaign_id=campaign_id, _external=True)
+    #url = url_for("routes.view_report", campaign_id=campaign_id, _external=True) + "?pdf=1"
+    url = url_for("routes.view_report", campaign_id=campaign_id, _external=True) + f"?pdf=1&username={session.get('username')}"
+
 
     with sync_playwright() as p:
         browser = p.chromium.launch()
@@ -410,6 +429,7 @@ def download_report(campaign_id):
         browser.close()
 
     return send_file(tmp_pdf.name, as_attachment=True, download_name=f"campaign_{campaign_id}_report.pdf")
+
 
 #-----------------------------------------------------------------------------------------------------------
 

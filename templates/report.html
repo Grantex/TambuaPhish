@@ -92,12 +92,26 @@
     </div>
 
     <!-- Download Button -->
-    <div class="text-center mt-4">
+    <!-- Download Button -->
+    <div class="text-center mt-4 no-print">
         <a href="{{ url_for('routes.download_report', campaign_id=campaign.id) }}" class="btn btn-primary">
             Download PDF
         </a>
     </div>
 </div>
+
+    <!-- Hide elements when printing (for Playwright PDF export) -->
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+
+
+
+
 
 <!-- Chart.js Logic -->
 <script>
