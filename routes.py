@@ -312,28 +312,30 @@ def close_campaign(campaign_id):
     return redirect(url_for("routes.get_campaigns"))
 
 
+#------option 2-----------------------------
 
-@routes_bp.route("/delete-campaign/<int:campaign_id>", methods=["DELETE"])
-def delete_campaign(campaign_id):
+# new route in your routes.py
+@routes_bp.route("/api/campaigns/<int:campaign_id>", methods=["DELETE"])
+def delete_campaign_api(campaign_id):
+    # Check for authentication (optional but good practice)
     if "username" not in session:
-        flash("Not logged in", "error")
-        return redirect(url_for("routes.get_campaigns"))
+        return jsonify({"error": "Unauthorized"}), 401
 
-    user = User.query.filter_by(username=session["username"]).first()
+    user = User.query.filter_by(username=session['username']).first()
     if not user:
-        flash("User not found", "error")
-        return redirect(url_for("routes.get_campaigns"))
+        return jsonify({"error": "User not found"}), 404
 
-    campaign = Campaign.query.get(campaign_id)
-    if not campaign or campaign.user_id != user.id:
-        flash("Campaign not found or unauthorized", "error")
-        return redirect(url_for("routes.get_campaigns"))
-
-    db.session.delete(campaign)
-    db.session.commit()
-
-    flash("Campaign deleted successfully", "success")
-    return redirect(url_for("routes.get_campaigns"))
+    campaign = Campaign.query.filter_by(id=campaign_id, user_id=session['username']).first()
+    if not campaign:
+        return jsonify({"error": "Campaign not found or unauthorized"}), 404
+        
+    try:
+        db.session.delete(campaign)
+        db.session.commit()
+        return jsonify({"message": "Campaign deleted successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to delete campaign: {str(e)}"}), 500
 
 #------------Campaign Report-------------------------------------
 

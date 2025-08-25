@@ -107,30 +107,31 @@ async function closeCampaign(id) {
 }
 
 // Delete campaign
+// Delete campaign
 async function deleteCampaign(id) {
-  if (!confirm(`Are you sure you want to delete campaign ID ${id}? This action cannot be undone.`)) return;
+    if (!confirm(`Are you sure you want to delete campaign ID ${id}? This action cannot be undone.`)) return;
 
-  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 
-  try {
-    const res = await fetch(`/delete-campaign/${id}`, {
-      method: "DELETE",
-      headers: {
-        "X-CSRFToken": csrfToken
-      }
-    });
+    try {
+        const res = await fetch(`/api/campaigns/${id}`, {
+            method: "DELETE",
+            headers: {
+                "X-CSRFToken": csrfToken
+            }
+        });
 
-    if (res.ok) {
-      alert("Campaign deleted successfully!");
-      loadCampaigns();
-    } else {
-      const errorData = await res.json().catch(() => ({}));
-      alert(`Failed to delete campaign: ${errorData.error || res.statusText}`);
+        if (res.ok) {
+            alert("Campaign deleted successfully!");
+            loadCampaigns(); // Reload the list of campaigns
+        } else {
+            const errorData = await res.json().catch(() => ({}));
+            alert(`Failed to delete campaign: ${errorData.error || res.statusText}`);
+        }
+    } catch (err) {
+        console.error(err);
+        alert("An error occurred while trying to delete the campaign.");
     }
-  } catch (err) {
-    console.error(err);
-    alert("An error occurred while trying to delete the campaign.");
-  }
 }
 
 function toggleDetails(id) {

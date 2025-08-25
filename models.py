@@ -29,6 +29,7 @@ class User(db.Model):
 
 
 # Campaign model 
+
 class Campaign(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -42,7 +43,13 @@ class Campaign(db.Model):
 
     # Relationships
     template = db.relationship('CustomEmailTemplate', backref=db.backref('campaigns', lazy=True))
-    recipients = db.relationship('Recipient', backref='campaign', lazy=True)
+    recipients = db.relationship(
+        'Recipient',
+        backref='campaign',
+        lazy=True,
+        cascade="all, delete-orphan",   # 🔹 Delete recipients when campaign is deleted
+        passive_deletes=True            # 🔹 Let the DB enforce delete rules
+    )
     user = db.relationship('User', backref=db.backref('campaigns', lazy=True))
 
     def mark_completed(self):
@@ -50,13 +57,15 @@ class Campaign(db.Model):
         self.end_date = datetime.utcnow()
 
 
+
 class Recipient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), nullable=False)
-    campaign_id = db.Column(db.Integer, db.ForeignKey('campaign.id'), nullable=False)
+    campaign_id = db.Column(db.Integer, db.ForeignKey('campaign.id', ondelete="CASCADE"), nullable=False)
     has_clicked = db.Column(db.Boolean, default=False)
     clicked_at = db.Column(db.DateTime, nullable=True)
-    sent_at = db.Column(db.DateTime, default=datetime.now())
+    sent_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 
 class TrainingModule(db.Model):
