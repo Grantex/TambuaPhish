@@ -301,7 +301,7 @@ def close_campaign(campaign_id):
         return redirect(url_for("routes.get_campaigns"))
 
     campaign = Campaign.query.get(campaign_id)
-    if not campaign or campaign.user_id != user.id:
+    if not campaign or campaign.user_id != session['username']:
         flash("Campaign not found or unauthorized", "error")
         return redirect(url_for("routes.get_campaigns"))
 
@@ -371,7 +371,7 @@ def view_report(campaign_id):
     for r in recipients:
         if r.has_clicked and r.clicked_at:
             status = "Clicked"
-            timestamp = r.clicked_at.strftime("%b %d %Y")
+            timestamp = r.clicked_at.strftime("%b %d %Y %I:%M %p")
         else:
             status = "Not Clicked"
             timestamp = None

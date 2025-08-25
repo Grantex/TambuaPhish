@@ -47,7 +47,7 @@ class Campaign(db.Model):
 
     def mark_completed(self):
         self.status = "Completed"
-        self.end_date = datetime.now()
+        self.end_date = datetime.utcnow()
 
 
 class Recipient(db.Model):
