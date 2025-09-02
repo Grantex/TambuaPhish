@@ -11,7 +11,7 @@ from forms import (
 )
 
 from flask import Blueprint, render_template, url_for, send_file
-from flask_wtf.csrf import generate_csrf
+from flask_wtf.csrf import generate_csrf, CSRFProtect
 from flask import jsonify
 from datetime import datetime
 from phishing_email_function import send_phishing_email
@@ -21,14 +21,15 @@ from models import User
 import json
 import tempfile
 from playwright.sync_api import sync_playwright
+from sqlalchemy.orm import joinedload
 
 
 routes_bp = Blueprint('routes', __name__)
 
+csrf = CSRFProtect()
 
 
-
-# --- Helper: Send Email ---
+# --- Send verification Email ---
 def send_verification_email(to_email, subject, body_html):
     mail = current_app.extensions['mail']
     msg = Message(subject, recipients=[to_email], html=body_html)
@@ -109,7 +110,7 @@ def login():
                 flash('Please verify your email before logging in.', 'warning')
                 return redirect(url_for('routes.login'))
 
-            # ✅ Store both username and user_id in session
+            # Store both username and user_id in session
             session['username'] = user.username
             session['user_id'] = user.id
             session.permanent = True
@@ -185,7 +186,7 @@ def dashboard():
 
     ctr = (total_clicks / total_recipients * 100) if total_recipients > 0 else 0
 
-    # Build dynamic monthly data
+    # Build dynamic monthly data stats
     monthly_emails_sent = []
     monthly_ctr = []
 
@@ -217,20 +218,7 @@ def dashboard():
 
 
 
-
-
 # --- Campaigns ---
-from datetime import datetime
-from flask import render_template, redirect, url_for, session, request
-from models import Campaign
-from sqlalchemy.orm import joinedload
-from datetime import datetime
-from flask import jsonify
-
-from flask import request
-from flask_wtf.csrf import CSRFProtect
-
-csrf = CSRFProtect()
 
 
 @routes_bp.route('/campaigns')
@@ -286,7 +274,7 @@ def get_campaigns():
     return jsonify(result)
 
 
-# NEW: Close campaign route
+# Close campaign route
 
 
 @routes_bp.route("/close-campaign/<int:campaign_id>", methods=["POST"])
@@ -312,12 +300,10 @@ def close_campaign(campaign_id):
     return redirect(url_for("routes.get_campaigns"))
 
 
-#------option 2-----------------------------
 
-# new route in your routes.py
+# Delete Campaign Route
 @routes_bp.route("/api/campaigns/<int:campaign_id>", methods=["DELETE"])
 def delete_campaign_api(campaign_id):
-    # Check for authentication (optional but good practice)
     if "username" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
@@ -350,7 +336,7 @@ def view_report(campaign_id):
     # Fetch campaign or 404
     campaign = Campaign.query.get_or_404(campaign_id)
 
-    # Resolve owner: use campaign.user if available, else fallback to session or query param
+    # Resolve owner: use campaign.user if available, else fallback to session username
     resolved_owner = (
         campaign.user.username if campaign.user
         else session.get('username') or request.args.get('username', 'Unknown')
@@ -417,7 +403,6 @@ def view_report(campaign_id):
 @routes_bp.route("/campaign/<int:campaign_id>/report/download")
 def download_report(campaign_id):
     # Generate PDF using Playwright
-    #url = url_for("routes.view_report", campaign_id=campaign_id, _external=True) + "?pdf=1"
     url = url_for("routes.view_report", campaign_id=campaign_id, _external=True) + f"?pdf=1&username={session.get('username')}"
 
 
@@ -435,7 +420,6 @@ def download_report(campaign_id):
 
 #-----------------------------------------------------------------------------------------------------------
 
-from datetime import datetime
 
 @routes_bp.route('/track-link/<int:campaign_id>/<int:recipient_id>')
 def track_link(campaign_id, recipient_id):
@@ -445,7 +429,7 @@ def track_link(campaign_id, recipient_id):
     ).first()
 
     if recipient:
-        # Only mark first click (if you want to avoid overwriting)
+        # Only captures first click 
         if not recipient.has_clicked:
             recipient.has_clicked = True
             recipient.clicked_at = datetime.utcnow()
@@ -495,9 +479,6 @@ def preview_template(template_id):
     return render_template('preview_templates.html', template=template)
 
 #------Edit Template-------------------
-
-from flask import render_template, request, redirect, url_for, session, flash
-from models import db, CustomEmailTemplate
 
 @routes_bp.route('/edit-template/<int:template_id>', methods=['GET', 'POST'])
 def edit_template(template_id):
@@ -574,7 +555,7 @@ def start_a_campaign():
         target_emails_raw = request.form.get('target_emails')
         selected_template_id = request.form.get('selected_template_id')
 
-        # 🚀 Save & Launch path
+        # Save & Launch path
         if 'save_and_launch' in request.form:
             if not campaign_name or not campaign_description or not target_emails_raw:
                 flash("Please fill all campaign fields before creating a template to launch.", "danger")
@@ -587,24 +568,24 @@ def start_a_campaign():
             }
             return redirect(url_for('routes.create_custom_template'))
 
-        # 🟢 Normal Launch path
+        # Normal Launch path
         if not campaign_name or not campaign_description or not target_emails_raw or not selected_template_id:
             flash("All campaign fields must be filled before launching.", "danger")
             return redirect(url_for('routes.start_a_campaign'))
 
         target_emails = [email.strip() for email in target_emails_raw.split(',') if email.strip()]
 
-        # ✅ Create campaign
+        # Create campaign
         new_campaign = Campaign(
             name=campaign_name.strip(),
             description=campaign_description.strip(),
             template_id=selected_template_id,
-            user_id=session['username']  # ✅ store actual user.id, not username
+            user_id=session['username']  
         )
         db.session.add(new_campaign)
         db.session.commit()  # commit so campaign_id exists
 
-        # ✅ Create recipients
+        # Creates recipients
         recipients = []
         for email in target_emails:
             recipient = Recipient(email=email, campaign_id=new_campaign.id)
@@ -612,17 +593,17 @@ def start_a_campaign():
             recipients.append(recipient)
         db.session.commit()  # commit so recipient IDs exist
 
-        # ✅ Load email template
+        # Load phishing email template
         template = CustomEmailTemplate.query.get(selected_template_id)
 
-        # ✅ Send emails using real recipient IDs
+        # Send emails using real recipient IDs
         for recipient in recipients:
             send_phishing_email(recipient.email, template, new_campaign.id, recipient.id)
 
         flash('Campaign launched and phishing emails sent successfully!', 'success')
         return redirect(url_for('routes.campaigns'))
 
-    # Just visiting the page
+ 
     pending_campaign = session.pop('pending_campaign', None)
     csrf_token = generate_csrf()
 
@@ -636,10 +617,6 @@ def start_a_campaign():
 
 
 #-----------------------------------------------------------------------------
-
-
-from flask import session, redirect, url_for
-
 
 @routes_bp.route('/create-custom-template', methods=['GET', 'POST'])
 def create_custom_template():
@@ -667,7 +644,7 @@ def create_custom_template():
         db.session.add(template)
         db.session.commit()
 
-        # 🚀 If Save & Launch, create campaign now
+        # If Save & Launch, create campaign now
         if 'save_and_launch' in request.form:
             campaign_name = request.form.get('campaign_name')
             campaign_description = request.form.get('campaign_description')
@@ -677,9 +654,9 @@ def create_custom_template():
                 flash('Missing campaign data. Please start again.', 'danger')
                 return redirect(url_for('routes.start_a_campaign'))
 
-            # ✅ Assign campaign to the logged-in user
+            # Assign campaign to the logged-in user
             new_campaign = Campaign(
-                user_id=session['user_id'],  # <-- IMPORTANT
+                user_id=session['user_id'],  
                 name=campaign_name,
                 description=campaign_description,
                 template_id=template.id
@@ -768,7 +745,6 @@ def training_modules():
         return redirect(url_for('routes.login'))
 
     # Fetch modules only for the logged-in user
-    #modules = TrainingModule.query.filter_by(user_id=session['username']).all()
 
     user = User.query.filter_by(username=session['username']).first()
     modules = TrainingModule.query.filter_by(user_id=session['username']).all()
@@ -780,9 +756,9 @@ def training_modules():
     )
 
 
-# =========================
-# Create Module (Show Form)
-# =========================
+
+# Create Training Module 
+
 @routes_bp.route('/create-training-module', methods=['GET', 'POST'])
 def create_training_module():
     if 'username' not in session:
@@ -804,9 +780,9 @@ def create_training_module():
 
     return render_template('create_training_module.html', form=form, username=session['username'])
 
-# =========================
-# Save Module (Form POST)
-# =========================
+
+# Save Training Module (Form POST)
+
 @routes_bp.route('/save-module', methods=['POST'])
 
 def save_module():
@@ -822,7 +798,7 @@ def save_module():
             format=form.format.data,
             duration=form.duration.data,
             content=form.content.data,
-            user_id=session['username']   # 🔑 save who created it
+            user_id=session['username']   # save who created it
         )
         db.session.add(new_module)
         db.session.commit()
@@ -909,7 +885,7 @@ def assign_training_module():
         db.session.add(assignment)
         db.session.commit()
 
-        # ✅ Use your new function to send assignment emails
+       
         if emails:
             email_list = [e.strip() for e in emails.split(",") if e.strip()]
             for email in email_list:
@@ -943,8 +919,6 @@ def public_training_module(token):
 
     module = TrainingModule.query.get_or_404(module_id)
 
-    # (Optional) You could later log or verify recipient here
-    # e.g. check if this recipient actually belongs to the campaign
 
     return render_template('public_training_module.html', module=module, recipient=recipient)
 

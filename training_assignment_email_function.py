@@ -10,23 +10,23 @@ load_dotenv()
 def get_serializer():
     return URLSafeSerializer(
         current_app.config['SECRET_KEY'], 
-        salt="training-module"   # ✅ same salt as in route
+        salt="training-module"   
     )
 
 def send_assignment_email(recipient_email, training_module, custom_message=None, app=None):
     recipient_email = recipient_email.strip()
 
-    # ✅ Use the same serializer with salt
+   
     serializer = get_serializer()
     token = serializer.dumps({
         "module_id": training_module.id,
         "recipient": recipient_email
     })
 
-    # ✅ Build secure link to training module
+    # secure link to training module
     training_link = url_for("routes.public_training_module", token=token, _external=True)
 
-    # ✅ Plain text body
+    # Email body
     plain_text_body = f"""
 {training_module.description}
 
@@ -37,7 +37,7 @@ This training module has been assigned to you.
 Access it here: {training_link}
 """
 
-    # ✅ HTML body
+    
     html_body = f"""
 <p>{training_module.description}</p>
 {f"<p>{custom_message}</p>" if custom_message else ""}

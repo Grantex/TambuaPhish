@@ -1,20 +1,19 @@
-# Centralized location for app configurations such as database URIs, debug settings, and secret keys
+# Centralized location for app configurations such as database URIs, secret keys, and email configurations
 
 import os
 from datetime import timedelta
 from dotenv import load_dotenv
 
-# Load environment variables from the .env file.
-# This must be called before accessing any environment variables.
+# Loads environment variables from the .env file.
+
 load_dotenv()
 
 class Config:
-    # Use os.environ.get() to safely retrieve environment variables.
-    # The second argument is a fallback value if the variable isn't found.
+   
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'a_fallback_secret_key'
     
-    # Flask-SQLAlchemy looks for 'SQLALCHEMY_DATABASE_URI'
-    # We map our 'DATABASE_URL' from the .env file to this variable.
+   
+    # 'DATABASE_URL' mapped from the .env file to this variable.
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
@@ -25,7 +24,7 @@ class Config:
     MAIL_PORT = 465
     MAIL_USE_SSL = True
     
-    # Retrieve mail credentials from the environment
+    # Retrieve mail credentials from the .env file
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     

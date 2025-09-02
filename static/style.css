@@ -23,12 +23,12 @@ body {
   top: 0;
   width: 100%;
   z-index: 999; /* High z-index so it stays on top of other content */
-  background: rgba(0, 0, 0, 0.6); /* Background ensures readability over images */
+  background: rgba(0, 0, 0, 0.6); /* Dark Background ensures readability over images */
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px 50px;
-  backdrop-filter: blur(10px); /* Optional for a glass-like effect */
+  backdrop-filter: blur(10px); 
 }
 
 .navbar .logo {
@@ -69,7 +69,7 @@ body {
     padding: 8px 16px;
     border: none;
     background: transparent;
-    transition: color 0.3s ease, text-decoration 0.3s ease; /* Transition */
+    transition: color 0.3s ease, text-decoration 0.3s ease; 
     font-size: 15px;
 }
 
@@ -90,15 +90,15 @@ body {
 }
 
 .hero-content h1 {
-  font-size: 45px; /* Larger heading */
+  font-size: 45px; 
   font-weight: bold;
   margin-bottom: 20px;
 }
 
 .hero-content p {
-  font-size: 20px; /* Slightly larger paragraph text */
+  font-size: 20px; 
   line-height: 1.9;
-  color: #f0f0f0; /* Optional: slightly softer white */
+  color: #f0f0f0; 
 }
 
 .hero-section {
@@ -108,23 +108,23 @@ body {
   background-size: cover;
   background-position: center;
   display: flex;
-  align-items: center;   /* Vertically center */
-  justify-content: flex-start; /* Align content to the left */
-  padding-left: 5%; /* Adjust this value to control how far from the left edge */
+  align-items: center;   
+  justify-content: flex-start; 
+  padding-left: 5%; 
   text-align: left;
 }
 
 .hero-content {
   max-width: 600px;
-  padding-left: 15px;  /* Adjust this value as needed */
-  padding-top: 32px;  /* Controls vertical positioning */
+  padding-left: 15px;  
+  padding-top: 32px;  
   text-align: left;
 }
 
 .hero-tagline {
-  font-size: 28px; /* Adjust as needed */
+  font-size: 28px; 
   margin-top: 20px;
-  color: #ffffff; /* or a contrasting color for better readability */
+  color: #ffffff; 
   font-weight: 500;
 }
 
@@ -152,10 +152,10 @@ body {
 /*About Section*/
 
 .about-section {
-  min-height: 100vh; /* Full height of the viewport */
+  min-height: 100vh; 
   padding: 80px 20px;
   text-align: center;
-  background-image: url('AboutSection_Bakcground_2.jpg'); /* Update path if needed */
+  background-image: url('AboutSection_Bakcground_2.jpg'); 
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -163,12 +163,12 @@ body {
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Vertically center the content */
+  justify-content: center; 
   align-items: center;
   z-index: 1;
 }
 
-/* Optional overlay for better readability */
+
 .about-section::before {
   content: '';
   position: absolute;
@@ -198,13 +198,13 @@ body {
 
 .features-section {
   min-height: 100vh;
-  padding-top: 130px; /* Adjust this value to move content further down */
-  padding-bottom: 60px; /* Optional for spacing at the bottom */
+  padding-top: 130px; 
+  padding-bottom: 60px; 
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  background-image: url('FeaturesSection_Background.jpg'); /* if you're using one */
+  background-image: url('FeaturesSection_Background.jpg'); 
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -274,14 +274,14 @@ body {
 /*Resources Section*/
 
 .resources-section {
-  min-height: 100vh; /* Full viewport height */
+  min-height: 100vh; 
   padding: 80px 20px;
   background: #0d1b2a;
   color: white;
   text-align: center;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Vertically center content */
+  justify-content: center; 
   align-items: center;
 }
 
@@ -330,7 +330,7 @@ body {
 .contact-section {
   min-height: 100vh;
   padding: 80px 50px;
-  background-image: url('ContactPage_Background.jpg'); /* Replace with your image path */
+  background-image: url('ContactPage_Background.jpg'); 
   background-size: cover;
   background-position: center;
   position: relative;
@@ -345,7 +345,7 @@ body {
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* Slightly dark overlay for readability */
+  background: rgba(0, 0, 0, 0.5); 
   z-index: 0;
 }
 
@@ -353,7 +353,7 @@ body {
   position: relative;
   z-index: 1;
   display: flex;
-  background-color: rgba(0, 191, 255, 0.2); /* Semi-transparent light blue */
+  background-color: rgba(0, 191, 255, 0.2); 
   border-radius: 12px;
   padding: 40px;
   backdrop-filter: blur(5px);
@@ -368,7 +368,7 @@ body {
   margin-bottom: 20px;
   font-size: 28px;
   color: #00BFFF;
-  text-align: center; /* Center the heading */
+  text-align: center; 
 }
 
 .contact-info h2 {
@@ -398,7 +398,7 @@ body {
 }
 
 .contact-form button {
-  margin: 20px auto 0 auto; /* Top margin + center horizontally */
+  margin: 20px auto 0 auto; 
   padding: 12px 24px;
   border: none;
   background-color: white;
@@ -408,7 +408,7 @@ body {
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  display: block; /* Allow auto horizontal margin to work */
+  display: block; 
 }
 
 
@@ -432,7 +432,7 @@ body {
 /*Footer*/
 
 .footer-ribbon {
-  background-color: #001f3f; /* Dark blue for contrast */
+  background-color: #001f3f; 
   color: white;
   text-align: center;
   padding: 15px 0;

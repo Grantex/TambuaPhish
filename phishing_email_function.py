@@ -9,7 +9,7 @@ load_dotenv()
 def send_phishing_email(recipient_email, template, campaign_id, recipient_id):
     recipient_email = recipient_email.strip()
 
-    # ✅ Generate tracking link to the new Recipient tracking route
+    # Generates tracking link to the new Recipient tracking route
     tracking_link = url_for(
         'routes.track_link',
         campaign_id=campaign_id,
@@ -17,7 +17,7 @@ def send_phishing_email(recipient_email, template, campaign_id, recipient_id):
         _external=True
     )
 
-    # ✅ Ensure HTML body is well-formed
+    # Ensures HTML body is well-formed
     plain_text_body = f"""{template.email_body}
 
 To learn more, click the link below:
@@ -30,7 +30,7 @@ To learn more, click the link below:
 <p><a href="{tracking_link}">Click here</a></p>
 """
 
-    # ✅ Build email
+    # Builds email from the template
     msg = EmailMessage()
     msg['Subject'] = template.subject.strip()
     msg['From'] = f"{template.sender_name.strip()} <info@tambuaphish.store>"
@@ -40,7 +40,7 @@ To learn more, click the link below:
     msg.set_content(plain_text_body)
     msg.add_alternative(html_body, subtype='html')
 
-    # ✅ SMTP (Zoho example)
+    # ✅ SMTP 
     smtp_server = os.getenv("HOST")
     smtp_port = os.getenv("SMTP_PORT")
     smtp_username = os.getenv("MAIL_USERNAME")

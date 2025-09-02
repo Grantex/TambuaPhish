@@ -14,7 +14,7 @@ body {
     display: flex;
     flex: 1;
     min-height: 0; /* Allow main-content to scroll within */
-    height: calc(100vh - 70px); /* Adjust if header height changes */
+    height: calc(100vh - 70px); 
 }
 
 /* Sidebar Styles */
@@ -125,14 +125,14 @@ footer p {
 
 .header-left h1 {
   margin: 0;
-  font-size: 18px;         /* slightly smaller title */
+  font-size: 18px;        
 }
 
 .header-right {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 12px; /* smaller text for username & logout */
+  font-size: 12px;
 }
 
 .header-right p {
@@ -143,8 +143,8 @@ footer p {
   background-color: #e74c3c;
   color: white;
   text-decoration: none;
-  padding: 4px 8px; /* smaller button */
-  font-size: 12px;   /* match text size */
+  padding: 4px 8px; 
+  font-size: 12px;   
   border-radius: 4px;
   transition: background-color 0.2s;
 }

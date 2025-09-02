@@ -23,7 +23,7 @@
                     <span class="toggle-password" onclick="togglePassword(this)">&#128065;</span>
                 </div>
 
-                <!-- Password Guideline Text -->
+                <!-- Password rules Text -->
                 <small class="guideline">
                 Password must be at least 12 characters and include uppercase, lowercase, a number, and a special character.
                 </small>
@@ -45,14 +45,13 @@
         const input = element.previousElementSibling;
         if (input.type === "password") {
             input.type = "text";
-            element.style.color = "#000"; // Optional: change color to indicate active
+            element.style.color = "#000"; 
         } else {
         input.type = "password";
-        element.style.color = "#fff"; // Back to normal
+        element.style.color = "#fff"; 
         }
     }
     </script>
-
 
 </body>
 </html>

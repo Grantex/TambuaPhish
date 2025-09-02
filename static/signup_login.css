@@ -141,7 +141,7 @@ p {
     padding-left: 5px;
 }
 
-/* Fix form elements overflowing */
+
 form {
     display: flex;
     flex-direction: column;
@@ -169,7 +169,7 @@ p a {
 
 /* Specific style overrides for login container size */
 .login-container {
-    height: 300px; /* was 300px; increased to give breathing room */
+    height: 300px; 
 }
 
 /* forgot password and reset passowrd flask rendering styling*/
@@ -202,7 +202,7 @@ input[type="submit"]:hover {
 
 .password-wrapper input {
     width: 100%;
-    padding-right: 35px; /* add space for the icon inside input */
+    padding-right: 35px; 
 }
 
 .password-wrapper .toggle-password {

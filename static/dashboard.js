@@ -47,7 +47,7 @@ const campaignChart = new Chart(ctx, {
                     text: 'Click-Through Rate (%)'
                 },
                 min: 0,
-                max: 100, // Keep CTR as percentage
+                max: 100, // Keeps CTR as percentage
                 ticks: {
                     callback: function(value) {
                         return value + '%';

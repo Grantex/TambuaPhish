@@ -1,10 +1,17 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, HiddenField, TextAreaField, SelectField, IntegerField
 from wtforms.validators import (
-    DataRequired, Length, Email, EqualTo, ValidationError, Regexp, NumberRange, URL
+    DataRequired, Length, Email, EqualTo, ValidationError, Regexp, NumberRange, URL, Optional
 )
 from wtforms import HiddenField
 from models import User
+
+
+
+
+
+
+#sign up form
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
@@ -40,18 +47,18 @@ class RegistrationForm(FlaskForm):
         if User.query.filter_by(username=username.data).first():
             raise ValidationError('That username is already taken.')
 
-
+#log in form 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
-
+#forgot password form
 class ForgotPasswordForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Send Reset Link')
 
-
+#reset password form after clicking link sent in email
 class ResetPasswordForm(FlaskForm):
     password = PasswordField('New Password', validators=[
         DataRequired(),
@@ -68,7 +75,7 @@ class ResetPasswordForm(FlaskForm):
     submit = SubmitField('Reset Password')
 
 
-    #------Edit Template Function--------
+    #------Edit Phishing Template Form--------
 
 
 class EditTemplateForm(FlaskForm):
@@ -78,10 +85,7 @@ class EditTemplateForm(FlaskForm):
     email_body = HiddenField('Email Body', validators=[DataRequired()])
     submit = SubmitField('Update Template')
 
-
-from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, IntegerField, SelectField, SubmitField
-from wtforms.validators import DataRequired, NumberRange, URL, Optional
+# Trainign module development form
 
 class TrainingModuleForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()])
@@ -108,13 +112,14 @@ class TrainingModuleForm(FlaskForm):
     )
     duration = IntegerField("Duration (min)", validators=[DataRequired(), NumberRange(min=1)])
     
-    # Use TextAreaField so it can hold long/multiple links
+    # TextAreaField can hold long/multiple links
     content = TextAreaField("Content (Link/Upload)", validators=[DataRequired()])
     
     submit = SubmitField("Save Module")
 
 
 
+#Assigning a training module form
 
 class AssignForm(FlaskForm):
     module_id = SelectField("Select Training Module", coerce=int, validators=[DataRequired()])

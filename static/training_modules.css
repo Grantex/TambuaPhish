@@ -1,4 +1,4 @@
-/* ===== GLOBAL PAGE STRUCTURE ===== */
+/* GLOBAL PAGE STRUCTURE */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -14,7 +14,7 @@ body {
   flex-grow: 1;
 }
 
-/* ===== SIDEBAR ===== */
+/* SIDEBAR */
 .sidebar {
   width: 182px;
   background-color: #ffffff;
@@ -51,7 +51,7 @@ body {
   font-weight: bold;
 }
 
-/* ===== HEADER ===== */
+/*  HEADER */
 .main-header {
   display: flex;
   justify-content: space-between;
@@ -91,7 +91,7 @@ body {
   background-color: #c0392b;
 }
 
-/* ===== MAIN CONTENT ===== */
+/*  MAIN CONTENT  */
 .main-content {
   flex: 1;
   padding: 20px;
@@ -100,7 +100,7 @@ body {
   flex-direction: column;
 }
 
-/* ===== MODULES HEADER ===== */
+/*  MODULES HEADER  */
 .modules-header {
   display: flex;
   justify-content: space-between;
@@ -125,7 +125,7 @@ body {
   background-color: #084080;
 }
 
-/* ===== FILTERS ===== */
+/*  FILTERS  */
 .filters {
   display: flex;
   flex-wrap: wrap;
@@ -141,14 +141,14 @@ body {
   background-color: white;
 }
 
-/* ===== MODULES GRID ===== */
+/*  MODULES GRID  */
 .modules-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
 }
 
-/* ===== MODULE CARD ===== */
+/* MODULE CARD */
 .module-card {
   background-color: #fff;
   border: 1px solid #dbe2ef;
@@ -190,7 +190,7 @@ body {
   gap: 10px;
 }
 
-/* ===== BUTTONS ===== */
+/*  BUTTONS  */
 .primary-btn {
   background-color: #0b3d91;
   color: #fff;
@@ -217,7 +217,7 @@ body {
   background-color: #d0d8e6;
 }
 
-/* ===== MODAL ===== */
+/*  MODAL  */
 .modal {
   display: none;
   position: fixed;
@@ -244,7 +244,7 @@ body {
   cursor: pointer;
 }
 
-/* ===== FOOTER ===== */
+/*  FOOTER  */
 footer {
   text-align: center;
   padding: 0.75rem 1rem;
@@ -260,7 +260,7 @@ footer p {
 
 
 
-/* ===== CREATE TRAINING MODULE FORM ===== */
+/*  CREATE TRAINING MODULE FORM   */
 .module-form {
   background-color: #ffffff;
   padding: 30px 150px;
@@ -270,7 +270,7 @@ footer p {
   margin: 40px auto 40px 110px;
   display: flex;
   flex-direction: column;
-  gap: 19px; /* spacing between fields */
+  gap: 19px; /* spacing between entry fields */
 }
 
 .module-form h1 {
@@ -288,7 +288,7 @@ footer p {
 }
 
 .module-form .form-control {
-  width: 150%; /* was 150%, fixed */
+  width: 150%; 
   padding: 20px 14px;
   border: 1px solid #ccc;
   border-radius: 8px;

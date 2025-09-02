@@ -74,7 +74,7 @@ function renderCampaigns(data) {
   });
 }
 
-// 🟢 Redirect to the report page
+// Redirects to the report page
 function viewReport(campaignId) {
   window.location.href = `/campaign/${campaignId}/report`;
 }
@@ -107,7 +107,7 @@ async function closeCampaign(id) {
 }
 
 // Delete campaign
-// Delete campaign
+
 async function deleteCampaign(id) {
     if (!confirm(`Are you sure you want to delete campaign ID ${id}? This action cannot be undone.`)) return;
 
@@ -123,7 +123,7 @@ async function deleteCampaign(id) {
 
         if (res.ok) {
             alert("Campaign deleted successfully!");
-            loadCampaigns(); // Reload the list of campaigns
+            loadCampaigns(); // Reloads the list of campaigns
         } else {
             const errorData = await res.json().catch(() => ({}));
             alert(`Failed to delete campaign: ${errorData.error || res.statusText}`);

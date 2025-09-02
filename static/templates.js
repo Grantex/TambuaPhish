@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   addTemplateBtn.addEventListener("click", () => {
-    window.location.href = "/create_custom_template";  // <-- Adjust this route if needed
+    window.location.href = "/create_custom_template";  
   });
 });
 

@@ -57,6 +57,7 @@ class Campaign(db.Model):
         self.end_date = datetime.utcnow()
 
 
+#recipients of phishing emails model
 
 class Recipient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -67,7 +68,7 @@ class Recipient(db.Model):
     sent_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-
+#Training module creation model
 class TrainingModule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
@@ -82,17 +83,17 @@ class TrainingModule(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", back_populates="modules")
 
-
+#Trainign module assignment db model
 
 class Assignment(db.Model):
     __tablename__ = "assignments"
 
     id = db.Column(db.Integer, primary_key=True)
     
-    # Link to training module
+    # Links to training module
     module_id = db.Column(db.Integer, db.ForeignKey("training_module.id"), nullable=False)
     
-    # Store emails (comma-separated string for now)
+    # Store emails (comma-separated)
     emails = db.Column(db.Text, nullable=False)
     
     # Optional message
